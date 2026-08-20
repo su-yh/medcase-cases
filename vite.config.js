@@ -4,7 +4,11 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd())
-  const proxyTarget = env.VITE_DEV_SERVER_PROXY || 'http://localhost:8080'
+  const proxyTarget = env.VITE_DEV_SERVER_PROXY
+
+  if (!proxyTarget) {
+    throw new Error('Missing required env: VITE_DEV_SERVER_PROXY')
+  }
 
   return {
     base: '/',

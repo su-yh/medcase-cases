@@ -28,6 +28,7 @@ yarn dev
 ```
 
 本地开发端口由 Vite 自动分配；如果默认端口被占用，会自动尝试下一个可用端口。
+开发代理地址需要在 `.env.development` 里配置 `VITE_DEV_SERVER_PROXY`。
 
 ## 生产构建
 
