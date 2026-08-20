@@ -15,7 +15,6 @@ export default defineConfig(({ mode }) => {
       }
     },
     server: {
-      port: Number(env.VITE_DEV_SERVER_PORT || 81),
       host: true,
       open: true,
       proxy: {
