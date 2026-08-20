@@ -29,6 +29,7 @@ yarn dev
 
 本地开发端口由 Vite 自动分配；如果默认端口被占用，会自动尝试下一个可用端口。
 开发代理地址需要在 `.env.development` 里配置 `VITE_DEV_SERVER_PROXY`。
+后端访问前缀按环境配置在各 `.env.*` 文件的 `VITE_APP_BASE_API` 中，当前示例包含 `/medcase` context-path。
 
 ## 生产构建
 

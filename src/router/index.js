@@ -4,10 +4,6 @@ import { buildTitle } from '@/utils/title'
 
 const routes = [
   {
-    path: '/',
-    redirect: '/home'
-  },
-  {
     path: '/login',
     name: 'Login',
     component: () => import('@/views/auth/LoginView.vue'),
@@ -25,12 +21,36 @@ const routes = [
   },
   {
     path: '/home',
-    name: 'Home',
-    component: () => import('@/views/home/HomeView.vue'),
+    redirect: '/cases'
+  },
+  {
+    path: '/',
+    component: () => import('@/layouts/DoctorLayout.vue'),
     meta: {
-      title: '首页',
       requiresAuth: true
-    }
+    },
+    children: [
+      {
+        path: '',
+        redirect: '/cases'
+      },
+      {
+        path: 'cases',
+        name: 'CaseCenter',
+        component: () => import('@/views/cases/CaseCenterView.vue'),
+        meta: {
+          title: '病例中心'
+        }
+      },
+      {
+        path: 'cases/submit',
+        name: 'CaseSubmit',
+        component: () => import('@/views/cases/SubmitCaseView.vue'),
+        meta: {
+          title: '提交病例'
+        }
+      }
+    ]
   }
 ]
 
