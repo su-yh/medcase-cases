@@ -7,5 +7,7 @@ export function unwrapResponse(payload) {
     return payload.data
   }
 
-  throw new Error(payload.msg || '请求失败')
+  const error = new Error(payload.msg || '请求失败')
+  error.code = payload.code
+  throw error
 }

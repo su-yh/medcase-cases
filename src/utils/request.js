@@ -17,22 +17,29 @@ service.interceptors.request.use((config) => {
   return config
 })
 
+function handleUnauthorized() {
+  clearToken()
+  if (window.location.pathname !== '/login') {
+    window.location.href = '/login'
+  }
+}
+
 service.interceptors.response.use(
   (response) => {
     try {
       return unwrapResponse(response.data)
     } catch (error) {
+      if (error.code === 401) {
+        handleUnauthorized()
+      }
       ElMessage.error(error.message || '请求失败')
       return Promise.reject(error)
     }
   },
   (error) => {
     const message = error.response?.data?.msg || error.message || '请求失败'
-    if (error.response?.status === 401) {
-      clearToken()
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login'
-      }
+    if (error.response?.status === 401 || error.response?.data?.code === 401) {
+      handleUnauthorized()
     }
     ElMessage.error(message)
     return Promise.reject(error)
