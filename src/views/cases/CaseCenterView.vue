@@ -30,7 +30,7 @@
       <el-table v-loading="loading" :data="caseList" row-key="id">
         <el-table-column label="病例" min-width="260">
           <template #default="{ row }">
-            <span class="case-name">病例 #{{ row.id }}</span>
+            <span class="case-name">{{ row.title }}</span>
             <span class="case-id">{{ formatDate(row.createTime) }}</span>
           </template>
         </el-table-column>
@@ -51,7 +51,7 @@
         </el-table-column>
         <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDetail(row.id)">
+            <el-button link type="primary" @click="openDetail(row)">
               {{ row.status === 'review_failed' ? '查看原因' : '查看详情' }}
             </el-button>
           </template>
@@ -77,6 +77,10 @@
     <el-dialog v-model="detailVisible" title="病例详情" width="680px">
       <template v-if="detail">
         <div class="detail-row">
+          <span>病例标题</span>
+          <strong>{{ detail.title }}</strong>
+        </div>
+        <div class="detail-row">
           <span>病例编号</span>
           <strong>#{{ detail.id }}</strong>
         </div>
@@ -90,9 +94,23 @@
           <span>审核失败原因</span>
           <p>{{ detail.reviewReason }}</p>
         </div>
-        <div class="detail-content">
+        <div v-if="detail.remark" class="detail-content">
           <span>备注</span>
           <p>{{ detail.remark }}</p>
+        </div>
+        <div v-if="detail.attachments.length" class="detail-content">
+          <span>附件</span>
+          <div class="detail-attachments">
+            <el-link
+              v-for="attachment in detail.attachments"
+              :key="attachment.url"
+              :href="attachment.url"
+              target="_blank"
+              type="primary"
+            >
+              {{ attachment.originalFilename || attachment.newFileName }}
+            </el-link>
+          </div>
         </div>
       </template>
     </el-dialog>
@@ -102,7 +120,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { getCaseDetail, getCasePage } from '@/api/doctor/cases'
+import { getCasePage } from '@/api/doctor/cases'
 import {
   CASE_STATUS_TABS,
   getCaseStatusLabel,
@@ -158,8 +176,8 @@ async function changeStatus(status) {
   await loadCases()
 }
 
-async function openDetail(id) {
-  detail.value = await getCaseDetail(id)
+function openDetail(caseItem) {
+  detail.value = caseItem
   detailVisible.value = true
 }
 

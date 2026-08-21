@@ -9,12 +9,20 @@
 
     <el-card shadow="never" class="submit-card">
       <el-form label-position="top" @submit.prevent="handleSubmit">
+        <el-form-item label="标题" required>
+          <el-input
+            v-model="form.title"
+            maxlength="100"
+            show-word-limit
+            placeholder="请输入病例标题"
+          />
+        </el-form-item>
         <el-form-item label="备注">
           <el-input
             v-model="form.remark"
             type="textarea"
-            :rows="14"
-            maxlength="10000"
+            :rows="4"
+            maxlength="500"
             show-word-limit
             placeholder="请输入备注（可选）"
           />
@@ -68,6 +76,7 @@ const uploadedAttachments = ref([])
 const allowedAttachmentExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'pdf', 'jpg', 'jpeg', 'png']
 
 const form = reactive({
+  title: '',
   remark: ''
 })
 
@@ -132,6 +141,10 @@ function removeAttachment(index) {
 }
 
 async function handleSubmit() {
+  if (!form.title.trim()) {
+    ElMessage.warning('请输入病例标题')
+    return
+  }
   if (uploading.value || uploadedAttachments.value.length !== attachmentFiles.value.length) {
     ElMessage.warning('请等待附件上传完成')
     return
@@ -140,6 +153,7 @@ async function handleSubmit() {
   loading.value = true
   try {
     await submitCase({
+      title: form.title,
       remark: form.remark,
       attachments: uploadedAttachments.value
     })
