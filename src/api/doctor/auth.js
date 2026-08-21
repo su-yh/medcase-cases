@@ -21,3 +21,10 @@ export function register(data) {
     data
   })
 }
+
+export function logout() {
+  return request({
+    url: '/doctor/auth/logout',
+    method: 'post'
+  })
+}
