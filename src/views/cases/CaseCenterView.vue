@@ -91,8 +91,8 @@
           <p>{{ detail.reviewReason }}</p>
         </div>
         <div class="detail-content">
-          <span>病例文本</span>
-          <p>{{ detail.caseContent }}</p>
+          <span>备注</span>
+          <p>{{ detail.remark }}</p>
         </div>
       </template>
     </el-dialog>

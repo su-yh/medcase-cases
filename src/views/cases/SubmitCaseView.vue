@@ -3,21 +3,43 @@
     <div class="submit-heading">
       <div>
         <h1>提交病例</h1>
-        <p>填写病例文本后提交，后续在病例中心查看审核进度。</p>
+        <p>填写病例备注并添加附件后提交，后续在病例中心查看审核进度。</p>
       </div>
     </div>
 
     <el-card shadow="never" class="submit-card">
       <el-form label-position="top" @submit.prevent="handleSubmit">
-        <el-form-item label="病例文本">
+        <el-form-item label="备注">
           <el-input
-            v-model="form.caseContent"
+            v-model="form.remark"
             type="textarea"
             :rows="14"
             maxlength="10000"
             show-word-limit
-            placeholder="请输入需要提交审核的病例内容"
+            placeholder="请输入备注"
           />
+        </el-form-item>
+        <el-form-item label="附件">
+          <input
+            ref="attachmentInput"
+            class="attachment-input"
+            type="file"
+            multiple
+            accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.pdf,.jpg,.jpeg,.png"
+            @change="handleAttachmentChange"
+          />
+          <el-button type="primary" native-type="button" @click="openAttachmentPicker">
+            选择附件
+          </el-button>
+          <div class="attachment-tip">最多上传 5 个附件，单个文件不超过 5 MB</div>
+          <ul v-if="attachmentFiles.length" class="attachment-list">
+            <li v-for="(file, index) in attachmentFiles" :key="file.uid">
+              <span>{{ file.name }}</span>
+              <el-button link type="danger" native-type="button" @click="removeAttachment(index)">
+                删除
+              </el-button>
+            </li>
+          </ul>
         </el-form-item>
         <div class="submit-footer">
           <el-button @click="router.push('/cases')">取消</el-button>
@@ -32,24 +54,70 @@
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { submitCase } from '@/api/doctor/cases'
+import { submitCase, uploadCaseAttachment } from '@/api/doctor/cases'
 
 const router = useRouter()
 const loading = ref(false)
+const attachmentInput = ref(null)
+const attachmentFiles = ref([])
+
+const allowedAttachmentExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'pdf', 'jpg', 'jpeg', 'png']
+
 const form = reactive({
-  caseContent: ''
+  remark: ''
 })
 
+function openAttachmentPicker() {
+  attachmentInput.value?.click()
+}
+
+function handleAttachmentChange(event) {
+  const selectedFiles = Array.from(event.target.files || [])
+  const remainingSlots = 5 - attachmentFiles.value.length
+  if (selectedFiles.length > remainingSlots) {
+    ElMessage.warning('最多上传 5 个附件')
+  }
+
+  const validFiles = selectedFiles.slice(0, remainingSlots).filter((file) => {
+    const extension = file.name.split('.').pop()?.toLowerCase()
+    if (!allowedAttachmentExtensions.includes(extension)) {
+      ElMessage.error(`${file.name}：不支持该附件格式`)
+      return false
+    }
+    if (file.size / 1024 / 1024 > 5) {
+      ElMessage.error(`${file.name}：单个附件不能超过 5 MB`)
+      return false
+    }
+    return true
+  })
+
+  attachmentFiles.value = attachmentFiles.value.concat(validFiles.map((raw) => ({
+    uid: `${raw.name}-${raw.lastModified}-${Math.random()}`,
+    name: raw.name,
+    raw
+  })))
+  event.target.value = ''
+}
+
+function removeAttachment(index) {
+  attachmentFiles.value.splice(index, 1)
+}
+
 async function handleSubmit() {
-  if (!form.caseContent.trim()) {
-    ElMessage.warning('请输入病例内容')
+  if (!form.remark.trim()) {
+    ElMessage.warning('请输入备注')
     return
   }
 
   loading.value = true
   try {
+    const attachments = []
+    for (const item of attachmentFiles.value) {
+      attachments.push(await uploadCaseAttachment(item.raw))
+    }
     await submitCase({
-      caseContent: form.caseContent
+      remark: form.remark,
+      attachments
     })
     ElMessage.success('病例提交成功，请等待管理端审核')
     await router.replace('/cases')
@@ -78,6 +146,42 @@ p {
 .submit-card {
   max-width: 860px;
   border: 1px solid var(--el-border-color);
+}
+
+.attachment-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.attachment-tip {
+  margin-top: 8px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+}
+
+.attachment-list {
+  max-width: 560px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.attachment-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 4px;
+}
+
+.attachment-list li + li {
+  margin-top: 8px;
 }
 
 .submit-footer {
