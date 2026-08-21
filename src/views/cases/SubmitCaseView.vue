@@ -16,7 +16,7 @@
             :rows="14"
             maxlength="10000"
             show-word-limit
-            placeholder="请输入备注"
+            placeholder="请输入备注（可选）"
           />
         </el-form-item>
         <el-form-item label="附件">
@@ -28,7 +28,7 @@
             accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.pdf,.jpg,.jpeg,.png"
             @change="handleAttachmentChange"
           />
-          <el-button type="primary" native-type="button" @click="openAttachmentPicker">
+          <el-button type="primary" native-type="button" :loading="uploading" @click="openAttachmentPicker">
             选择附件
           </el-button>
           <div class="attachment-tip">最多上传 5 个附件，单个文件不超过 5 MB</div>
@@ -43,7 +43,9 @@
         </el-form-item>
         <div class="submit-footer">
           <el-button @click="router.push('/cases')">取消</el-button>
-          <el-button type="primary" native-type="submit" :loading="loading">提交病例</el-button>
+          <el-button type="primary" native-type="submit" :loading="loading" :disabled="uploading || uploadedAttachments.length !== attachmentFiles.length">
+            提交病例
+          </el-button>
         </div>
       </el-form>
     </el-card>
@@ -54,12 +56,14 @@
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { submitCase, uploadCaseAttachment } from '@/api/doctor/cases'
+import { submitCase, uploadCaseAttachments } from '@/api/doctor/cases'
 
 const router = useRouter()
 const loading = ref(false)
+const uploading = ref(false)
 const attachmentInput = ref(null)
 const attachmentFiles = ref([])
+const uploadedAttachments = ref([])
 
 const allowedAttachmentExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'pdf', 'jpg', 'jpeg', 'png']
 
@@ -71,7 +75,7 @@ function openAttachmentPicker() {
   attachmentInput.value?.click()
 }
 
-function handleAttachmentChange(event) {
+async function handleAttachmentChange(event) {
   const selectedFiles = Array.from(event.target.files || [])
   const remainingSlots = 5 - attachmentFiles.value.length
   if (selectedFiles.length > remainingSlots) {
@@ -91,33 +95,53 @@ function handleAttachmentChange(event) {
     return true
   })
 
-  attachmentFiles.value = attachmentFiles.value.concat(validFiles.map((raw) => ({
+  const newFiles = validFiles.map((raw) => ({
     uid: `${raw.name}-${raw.lastModified}-${Math.random()}`,
     name: raw.name,
-    raw
-  })))
+    raw,
+    uploading: true
+  }))
+  attachmentFiles.value = attachmentFiles.value.concat(newFiles)
   event.target.value = ''
+
+  if (!newFiles.length) {
+    return
+  }
+
+  uploading.value = true
+  try {
+    const uploaded = await uploadCaseAttachments(newFiles.map(item => item.raw))
+    uploadedAttachments.value = uploadedAttachments.value.concat(uploaded)
+    newFiles.forEach(file => {
+      file.uploading = false
+    })
+    ElMessage.success('附件上传成功')
+  } catch (error) {
+    attachmentFiles.value = attachmentFiles.value.filter(file => !newFiles.includes(file))
+    ElMessage.error(error.message || '附件上传失败')
+  } finally {
+    uploading.value = false
+  }
 }
 
 function removeAttachment(index) {
-  attachmentFiles.value.splice(index, 1)
+  const removed = attachmentFiles.value.splice(index, 1)[0]
+  if (!removed?.uploading) {
+    uploadedAttachments.value.splice(index, 1)
+  }
 }
 
 async function handleSubmit() {
-  if (!form.remark.trim()) {
-    ElMessage.warning('请输入备注')
+  if (uploading.value || uploadedAttachments.value.length !== attachmentFiles.value.length) {
+    ElMessage.warning('请等待附件上传完成')
     return
   }
 
   loading.value = true
   try {
-    const attachments = []
-    for (const item of attachmentFiles.value) {
-      attachments.push(await uploadCaseAttachment(item.raw))
-    }
     await submitCase({
       remark: form.remark,
-      attachments
+      attachments: uploadedAttachments.value
     })
     ElMessage.success('病例提交成功，请等待管理端审核')
     await router.replace('/cases')

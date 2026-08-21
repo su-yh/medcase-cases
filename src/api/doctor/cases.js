@@ -1,18 +1,18 @@
 import request from '@/utils/request'
 
-export async function uploadCaseAttachment(file) {
+export async function uploadCaseAttachments(files) {
   const formData = new FormData()
-  formData.append('file', file)
+  files.forEach(file => formData.append('files', file))
   const response = await request({
-    url: '/common/upload',
+    url: '/common/uploads',
     method: 'post',
     data: formData
   })
-  return {
-    fileName: response.fileName,
-    originalFilename: response.originalFilename,
-    url: response.url
-  }
+  return response.map(file => ({
+    url: file.url,
+    newFileName: file.newFileName,
+    originalFilename: file.originalFilename
+  }))
 }
 
 export function submitCase(data) {

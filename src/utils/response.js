@@ -3,7 +3,7 @@ export function unwrapResponse(payload) {
     throw new Error('请求失败')
   }
 
-  if (payload.code === 0) {
+  if (payload.code === 0 || payload.code === 200) {
     return payload.data
   }
 
