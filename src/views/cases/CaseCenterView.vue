@@ -171,7 +171,7 @@
     <CaseEditDialog
       v-model="editVisible"
       :case-item="editingCase"
-      @submitted="handleCaseChanged"
+      @changed="handleCaseChanged"
     />
   </div>
 </template>
