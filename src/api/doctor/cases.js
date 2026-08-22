@@ -46,6 +46,13 @@ export function getCaseDetail(id) {
   }).then(normalizeCase)
 }
 
+export function deleteCase(id) {
+  return request({
+    url: `/doctor/cases/${id}`,
+    method: 'delete'
+  })
+}
+
 function normalizeCasePage(page) {
   return {
     ...page,

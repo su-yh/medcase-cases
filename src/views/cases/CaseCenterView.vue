@@ -82,15 +82,23 @@
             {{ formatDate(row.settledTime || row.reviewTime) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <el-button
               v-if="row.status === 'draft'"
               link
               type="primary"
-              @click="editDraft(row)"
+              @click="openEdit(row)"
             >
-              修改
+              编辑
+            </el-button>
+            <el-button
+              v-if="row.status === 'draft'"
+              link
+              type="danger"
+              @click="removeDraft(row)"
+            >
+              删除
             </el-button>
             <el-button link type="primary" @click="openDetail(row)">
               {{ row.status === 'review_failed' ? '查看原因' : '查看详情' }}
@@ -159,13 +167,21 @@
         </div>
       </template>
     </el-dialog>
+
+    <CaseEditDialog
+      v-model="editVisible"
+      :case-item="editingCase"
+      @submitted="handleCaseChanged"
+    />
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { getCasePage } from '@/api/doctor/cases'
+import { deleteCase, getCasePage } from '@/api/doctor/cases'
+import CaseEditDialog from '@/components/cases/CaseEditDialog.vue'
 import {
   CASE_STATUS_TABS,
   getCaseStatusLabel,
@@ -185,6 +201,8 @@ const pageNo = ref(1)
 const pageSize = ref(10)
 const detailVisible = ref(false)
 const detail = ref(null)
+const editVisible = ref(false)
+const editingCase = ref(null)
 
 const statusTagTypes = {
   draft: 'info',
@@ -248,16 +266,43 @@ function openDetail(caseItem) {
   detailVisible.value = true
 }
 
-function editDraft(caseItem) {
+function openEdit(caseItem) {
   if (caseItem.status !== 'draft') {
     return
   }
-  router.push({
-    name: 'CaseSubmit',
-    query: {
-      id: caseItem.id
+  editingCase.value = caseItem
+  editVisible.value = true
+}
+
+async function removeDraft(caseItem) {
+  if (caseItem.status !== 'draft') {
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      `确定删除病例“${caseItem.title}”吗？删除后不可恢复。`,
+      '删除草稿',
+      {
+        type: 'warning',
+        confirmButtonText: '删除',
+        cancelButtonText: '取消'
+      }
+    )
+    await deleteCase(caseItem.id)
+    ElMessage.success('草稿删除成功')
+    await loadCases()
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') {
+      return
     }
-  })
+    ElMessage.error(error.message || '草稿删除失败')
+  }
+}
+
+async function handleCaseChanged() {
+  editingCase.value = null
+  await loadCases()
 }
 
 onMounted(loadCases)
