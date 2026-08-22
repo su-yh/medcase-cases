@@ -3,6 +3,7 @@ import {
   ElButton,
   ElCard,
   ElDialog,
+  ElDatePicker,
   ElEmpty,
   ElForm,
   ElFormItem,
@@ -28,6 +29,7 @@ app.use(router)
 app.component(ElButton.name, ElButton)
 app.component(ElCard.name, ElCard)
 app.component(ElDialog.name, ElDialog)
+app.component(ElDatePicker.name, ElDatePicker)
 app.component(ElEmpty.name, ElEmpty)
 app.component(ElForm.name, ElForm)
 app.component(ElFormItem.name, ElFormItem)

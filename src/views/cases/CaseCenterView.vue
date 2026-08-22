@@ -21,6 +21,29 @@
       </button>
     </div>
 
+    <el-card shadow="never" class="case-search-card">
+      <el-form inline @submit.prevent="searchCases">
+        <el-form-item label="标题">
+          <el-input v-model="filters.title" clearable placeholder="请输入病例标题" @keyup.enter="searchCases" />
+        </el-form-item>
+        <el-form-item label="提交时间">
+          <el-date-picker
+            v-model="filters.createTimeRange"
+            type="daterange"
+            value-format="YYYY-MM-DD"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="searchCases">查询</el-button>
+          <el-button @click="resetSearch">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
     <div class="case-toolbar">
       <span>共 {{ total }} 条病例记录</span>
       <span>列表只提供查看和详情入口</span>
@@ -82,8 +105,9 @@
           v-model:current-page="pageNo"
           v-model:page-size="pageSize"
           background
-          layout="total, prev, pager, next"
+          layout="total, sizes, prev, pager, next, jumper"
           :total="total"
+          :hide-on-single-page="false"
           @current-change="loadCases"
           @size-change="loadCases"
         />
@@ -149,6 +173,10 @@ import {
 const router = useRouter()
 const loading = ref(false)
 const activeStatus = ref('')
+const filters = ref({
+  title: '',
+  createTimeRange: []
+})
 const caseList = ref([])
 const total = ref(0)
 const pageNo = ref(1)
@@ -180,10 +208,13 @@ async function loadCases() {
     const result = await getCasePage({
       pageNo: pageNo.value,
       pageSize: pageSize.value,
-      status: activeStatus.value || undefined
+      titleLike: filters.value.title || undefined,
+      status: activeStatus.value || undefined,
+      createTimeLowerBound: filters.value.createTimeRange?.[0] || undefined,
+      createTimeUpperBound: filters.value.createTimeRange?.[1] || undefined
     })
     caseList.value = result?.list || []
-    total.value = result?.total || 0
+    total.value = Number(result?.total || 0)
   } finally {
     loading.value = false
   }
@@ -191,6 +222,20 @@ async function loadCases() {
 
 async function changeStatus(status) {
   activeStatus.value = status
+  pageNo.value = 1
+  await loadCases()
+}
+
+async function searchCases() {
+  pageNo.value = 1
+  await loadCases()
+}
+
+async function resetSearch() {
+  filters.value = {
+    title: '',
+    createTimeRange: []
+  }
   pageNo.value = 1
   await loadCases()
 }
@@ -254,6 +299,15 @@ p {
   height: 2px;
   background: var(--el-color-primary);
   content: "";
+}
+
+.case-search-card {
+  margin-bottom: 16px;
+  border: 1px solid var(--el-border-color);
+}
+
+.case-search-card :deep(.el-form-item) {
+  margin-bottom: 0;
 }
 
 .case-toolbar {
