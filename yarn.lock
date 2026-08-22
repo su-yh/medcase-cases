@@ -616,6 +616,16 @@
     loupe "^3.1.2"
     tinyrainbow "^1.2.0"
 
+"@vue-office/docx@^1.6.3":
+  version "1.6.3"
+  resolved "https://registry.npmmirror.com/@vue-office/docx/-/docx-1.6.3.tgz#0c183b13553c029fea702eb8b8b4260a7e1f0961"
+  integrity sha512-Cs+3CAaRBOWOiW4XAhTwwxJ0dy8cPIf6DqfNvYcD3YACiLwO4kuawLF2IAXxyijhbuOeoFsfvoVbOc16A/4bZA==
+
+"@vue-office/pdf@^2.0.10":
+  version "2.0.10"
+  resolved "https://registry.npmmirror.com/@vue-office/pdf/-/pdf-2.0.10.tgz#2d85e449c017289084e64dc029613d05767afa5c"
+  integrity sha512-yHVLrMAKpMPBkhBwofFyGEtEeJF0Zd7oGmf56Pe5aj/xObdRq3E1CIZqTqhWJNgHV8oLQqaX0vs4p5T1zq+GIA==
+
 "@vue/compiler-core@3.5.26":
   version "3.5.26"
   resolved "https://registry.npmmirror.com/@vue/compiler-core/-/compiler-core-3.5.26.tgz#1a91ea90980528bedff7b1c292690bfb30612485"

@@ -44,6 +44,22 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="附件" min-width="220">
+          <template #default="{ row }">
+            <div v-if="row.attachments.length" class="table-attachments">
+              <el-button
+                v-for="attachment in row.attachments"
+                :key="attachment.url"
+                link
+                type="primary"
+
+              >
+                {{ attachment.originalFilename || attachment.newFileName || attachment.fileName }}
+              </el-button>
+            </div>
+            <span v-else class="empty-attachment">无附件</span>
+          </template>
+        </el-table-column>
         <el-table-column label="审核/结算时间" width="180">
           <template #default="{ row }">
             {{ formatDate(row.settledTime || row.reviewTime) }}
@@ -75,6 +91,9 @@
     </el-card>
 
     <el-dialog v-model="detailVisible" title="病例详情" width="680px">
+      <template #footer>
+        <el-button @click="detailVisible = false">关闭</el-button>
+      </template>
       <template v-if="detail">
         <div class="detail-row">
           <span>病例标题</span>
@@ -101,15 +120,15 @@
         <div v-if="detail.attachments.length" class="detail-content">
           <span>附件</span>
           <div class="detail-attachments">
-            <el-link
+            <el-button
               v-for="attachment in detail.attachments"
               :key="attachment.url"
-              :href="attachment.url"
-              target="_blank"
+              link
               type="primary"
+              @click="previewAttachment(attachment)"
             >
-              {{ attachment.originalFilename || attachment.newFileName }}
-            </el-link>
+              {{ attachment.originalFilename || attachment.newFileName || attachment.fileName }}
+            </el-button>
           </div>
         </div>
       </template>
@@ -249,6 +268,18 @@ p {
 .case-table-card {
   border: 1px solid var(--el-border-color);
 }
+
+.table-attachments,
+.detail-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.empty-attachment {
+  color: var(--el-text-color-placeholder);
+}
+
 
 .case-name,
 .case-id {
