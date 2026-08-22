@@ -1,5 +1,6 @@
 export const CASE_STATUS_TABS = [
   { key: '', label: '全部病例' },
+  { key: 'draft', label: '草稿' },
   { key: 'pending_review', label: '待审核' },
   { key: 'review_failed', label: '审核失败' },
   { key: 'approved_pending_settlement', label: '审核通过 / 待结算' },
@@ -16,6 +17,7 @@ export function getCaseStatusLabel(status) {
 
 export function getCaseStatusClass(status) {
   return {
+    draft: 'draft',
     pending_review: 'reviewing',
     review_failed: 'failed',
     approved_pending_settlement: 'passed',

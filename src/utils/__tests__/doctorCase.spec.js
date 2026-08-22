@@ -6,6 +6,7 @@ describe('doctor case helpers', () => {
 
     expect(CASE_STATUS_TABS.map((item) => item.key)).toEqual([
       '',
+      'draft',
       'pending_review',
       'review_failed',
       'approved_pending_settlement',
@@ -16,6 +17,7 @@ describe('doctor case helpers', () => {
   it('resolves status labels', async () => {
     const { getCaseStatusLabel } = await import('@/utils/doctorCase')
 
+    expect(getCaseStatusLabel('draft')).toBe('草稿')
     expect(getCaseStatusLabel('review_failed')).toBe('审核失败')
     expect(getCaseStatusLabel('unknown')).toBe('未知状态')
   })

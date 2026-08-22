@@ -46,7 +46,7 @@
 
     <div class="case-toolbar">
       <span>共 {{ total }} 条病例记录</span>
-      <span>列表只提供查看和详情入口</span>
+      <span>草稿支持修改，其他状态仅可查看</span>
     </div>
 
     <el-card shadow="never" class="case-table-card">
@@ -82,8 +82,16 @@
             {{ formatDate(row.settledTime || row.reviewTime) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
+            <el-button
+              v-if="row.status === 'draft'"
+              link
+              type="primary"
+              @click="editDraft(row)"
+            >
+              修改
+            </el-button>
             <el-button link type="primary" @click="openDetail(row)">
               {{ row.status === 'review_failed' ? '查看原因' : '查看详情' }}
             </el-button>
@@ -179,6 +187,7 @@ const detailVisible = ref(false)
 const detail = ref(null)
 
 const statusTagTypes = {
+  draft: 'info',
   reviewing: 'warning',
   failed: 'danger',
   passed: 'success',
@@ -237,6 +246,18 @@ async function resetSearch() {
 function openDetail(caseItem) {
   detail.value = caseItem
   detailVisible.value = true
+}
+
+function editDraft(caseItem) {
+  if (caseItem.status !== 'draft') {
+    return
+  }
+  router.push({
+    name: 'CaseSubmit',
+    query: {
+      id: caseItem.id
+    }
+  })
 }
 
 onMounted(loadCases)

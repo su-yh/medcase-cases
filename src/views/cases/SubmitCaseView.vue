@@ -2,12 +2,16 @@
   <div class="submit-page">
     <div class="submit-heading">
       <div>
-        <h1>提交病例</h1>
-        <p>填写病例备注并添加附件后提交，后续在病例中心查看审核进度。</p>
+        <h1>{{ isEditMode ? '编辑草稿' : '提交病例' }}</h1>
+        <p>
+          {{ isEditMode
+            ? '完善草稿内容并提交，提交后将进入管理端审核。'
+            : '填写病例备注并添加附件后提交，后续在病例中心查看审核进度。' }}
+        </p>
       </div>
     </div>
 
-    <el-card shadow="never" class="submit-card">
+    <el-card v-loading="detailLoading" shadow="never" class="submit-card">
       <el-form label-position="top" @submit.prevent="handleSubmit">
         <el-form-item label="标题" required>
           <el-input
@@ -51,7 +55,21 @@
         </el-form-item>
         <div class="submit-footer">
           <el-button @click="router.push('/cases')">取消</el-button>
-          <el-button type="primary" native-type="submit" :loading="loading" :disabled="uploading || uploadedAttachments.length !== attachmentFiles.length">
+          <el-button
+            v-if="!isEditMode"
+            native-type="button"
+            :loading="saving"
+            :disabled="isBusy || hasUploadingAttachments"
+            @click="handleSaveDraft"
+          >
+            保存草稿
+          </el-button>
+          <el-button
+            type="primary"
+            native-type="submit"
+            :loading="loading"
+            :disabled="isBusy || hasUploadingAttachments || uploadedAttachments.length !== attachmentFiles.length"
+          >
             提交病例
           </el-button>
         </div>
@@ -61,17 +79,24 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useRouter } from 'vue-router'
-import { submitCase, uploadCaseAttachments } from '@/api/doctor/cases'
+import { useRoute, useRouter } from 'vue-router'
+import {
+  getCaseDetail,
+  saveDraftCase,
+  submitCase,
+  uploadCaseAttachments
+} from '@/api/doctor/cases'
 
+const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
+const saving = ref(false)
+const detailLoading = ref(false)
 const uploading = ref(false)
 const attachmentInput = ref(null)
 const attachmentFiles = ref([])
-const uploadedAttachments = ref([])
 
 const allowedAttachmentExtensions = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'pdf', 'jpg', 'jpeg', 'png']
 
@@ -79,6 +104,17 @@ const form = reactive({
   title: '',
   remark: ''
 })
+
+const editId = computed(() => {
+  const id = route.query.id
+  return Array.isArray(id) ? id[0] : id
+})
+const isEditMode = computed(() => Boolean(editId.value))
+const uploadedAttachments = computed(() => attachmentFiles.value
+  .filter(file => file.attachment && !file.uploading)
+  .map(file => file.attachment))
+const hasUploadingAttachments = computed(() => attachmentFiles.value.some(file => file.uploading))
+const isBusy = computed(() => loading.value || saving.value || uploading.value || detailLoading.value)
 
 function openAttachmentPicker() {
   attachmentInput.value?.click()
@@ -108,7 +144,8 @@ async function handleAttachmentChange(event) {
     uid: `${raw.name}-${raw.lastModified}-${Math.random()}`,
     name: raw.name,
     raw,
-    uploading: true
+    uploading: true,
+    attachment: null
   }))
   attachmentFiles.value = attachmentFiles.value.concat(newFiles)
   event.target.value = ''
@@ -120,9 +157,12 @@ async function handleAttachmentChange(event) {
   uploading.value = true
   try {
     const uploaded = await uploadCaseAttachments(newFiles.map(item => item.raw))
-    uploadedAttachments.value = uploadedAttachments.value.concat(uploaded)
-    newFiles.forEach(file => {
+    if (uploaded.length !== newFiles.length) {
+      throw new Error('附件上传结果异常')
+    }
+    newFiles.forEach((file, index) => {
       file.uploading = false
+      file.attachment = uploaded[index]
     })
     ElMessage.success('附件上传成功')
   } catch (error) {
@@ -134,35 +174,98 @@ async function handleAttachmentChange(event) {
 }
 
 function removeAttachment(index) {
-  const removed = attachmentFiles.value.splice(index, 1)[0]
-  if (!removed?.uploading) {
-    uploadedAttachments.value.splice(index, 1)
+  attachmentFiles.value.splice(index, 1)
+}
+
+function validateForm() {
+  if (!form.title.trim()) {
+    ElMessage.warning('请输入病例标题')
+    return false
+  }
+  if (hasUploadingAttachments.value || uploadedAttachments.value.length !== attachmentFiles.value.length) {
+    ElMessage.warning('请等待附件上传完成')
+    return false
+  }
+  return true
+}
+
+function buildPayload() {
+  const payload = {
+    title: form.title,
+    remark: form.remark,
+    attachments: uploadedAttachments.value
+  }
+  if (isEditMode.value) {
+    payload.id = editId.value
+  }
+  return payload
+}
+
+async function handleSaveDraft() {
+  if (isEditMode.value || !validateForm()) {
+    return
+  }
+
+  saving.value = true
+  try {
+    await saveDraftCase(buildPayload())
+    ElMessage.success('病例草稿保存成功')
+    await router.replace('/cases')
+  } finally {
+    saving.value = false
   }
 }
 
 async function handleSubmit() {
-  if (!form.title.trim()) {
-    ElMessage.warning('请输入病例标题')
-    return
-  }
-  if (uploading.value || uploadedAttachments.value.length !== attachmentFiles.value.length) {
-    ElMessage.warning('请等待附件上传完成')
+  if (!validateForm()) {
     return
   }
 
   loading.value = true
   try {
-    await submitCase({
-      title: form.title,
-      remark: form.remark,
-      attachments: uploadedAttachments.value
-    })
+    await submitCase(buildPayload())
     ElMessage.success('病例提交成功，请等待管理端审核')
     await router.replace('/cases')
   } finally {
     loading.value = false
   }
 }
+
+function setCaseDetail(caseItem) {
+  form.title = caseItem.title || ''
+  form.remark = caseItem.remark || ''
+  attachmentFiles.value = (caseItem.attachments || []).map((attachment, index) => ({
+    uid: `existing-${attachment.url || index}`,
+    name: attachment.originalFilename || attachment.newFileName || attachment.fileName || `附件${index + 1}`,
+    raw: null,
+    uploading: false,
+    attachment
+  }))
+}
+
+async function loadDraft() {
+  detailLoading.value = true
+  try {
+    const caseItem = await getCaseDetail(editId.value)
+    if (caseItem.status !== 'draft') {
+      ElMessage.warning('当前病例不可修改')
+      await router.replace('/cases')
+      return
+    }
+    setCaseDetail(caseItem)
+  } catch (error) {
+    ElMessage.error(error.message || '病例详情加载失败')
+    await router.replace('/cases')
+  } finally {
+    detailLoading.value = false
+  }
+}
+
+onMounted(() => {
+  if (isEditMode.value) {
+    loadDraft()
+  }
+})
 </script>
 
 <style scoped>

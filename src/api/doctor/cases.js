@@ -23,6 +23,14 @@ export function submitCase(data) {
   })
 }
 
+export function saveDraftCase(data) {
+  return request({
+    url: '/doctor/cases/draft',
+    method: 'post',
+    data
+  })
+}
+
 export function getCasePage(params) {
   return request({
     url: '/doctor/cases',
