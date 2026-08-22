@@ -1,4 +1,4 @@
-<template>
+<template xmlns="http://www.w3.org/1999/html">
   <div class="case-page">
     <div class="case-heading">
       <div>
@@ -51,15 +51,9 @@
 
     <el-card shadow="never" class="case-table-card">
       <el-table v-loading="loading" :data="caseList" row-key="id">
-        <el-table-column label="病例" min-width="260">
-          <template #default="{ row }">
-            <span class="case-name">{{ row.title }}</span>
-            <span class="case-id">{{ formatDate(row.createTime) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="提交时间" width="180">
-          <template #default="{ row }">{{ formatDate(row.createTime) }}</template>
-        </el-table-column>
+        <el-table-column label="序号" width="60" type="index" />
+        <el-table-column label="标题" min-width="180" header-align="center" prop="title"/>
+        <el-table-column label="提交时间" width="180" prop="createTime"/>
         <el-table-column label="当前状态" width="190">
           <template #default="{ row }">
             <el-tag :type="getStatusTagType(row.status)" effect="light">
