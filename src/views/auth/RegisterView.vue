@@ -10,6 +10,14 @@
         <el-form-item label="密码">
           <el-input v-model="form.password" type="password" placeholder="请输入密码" show-password />
         </el-form-item>
+        <el-form-item label="确认密码">
+          <el-input
+            v-model="form.confirmPassword"
+            type="password"
+            placeholder="请再次输入密码"
+            show-password
+          />
+        </el-form-item>
         <el-button type="primary" native-type="submit" :loading="loading" style="width: 100%">
           注册
         </el-button>
@@ -26,6 +34,7 @@ import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
+import { isPasswordConfirmed } from '@/utils/register'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -33,13 +42,22 @@ const loading = ref(false)
 
 const form = reactive({
   username: '',
-  password: ''
+  password: '',
+  confirmPassword: ''
 })
 
 async function handleRegister() {
+  if (!isPasswordConfirmed(form.password, form.confirmPassword)) {
+    ElMessage.error('两次输入的密码不一致')
+    return
+  }
+
   loading.value = true
   try {
-    await userStore.register(form)
+    await userStore.register({
+      username: form.username,
+      password: form.password
+    })
     ElMessage.success('注册成功，请登录')
     await router.replace('/login')
   } finally {
