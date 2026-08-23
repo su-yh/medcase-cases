@@ -26,19 +26,42 @@
         <router-link to="/login">已有账号，去登录</router-link>
       </div>
     </el-card>
+
+    <el-dialog
+      v-model="registerSuccessVisible"
+      class="register-success-dialog"
+      title="注册成功"
+      width="400px"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      :show-close="false"
+      align-center
+    >
+      <p class="register-success-message">
+        账号注册成功，{{ remainingSeconds }} 秒后自动跳转到登录页面。
+      </p>
+      <template #footer>
+        <el-button type="primary" @click="goToLogin">去登录</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { onBeforeUnmount, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
+import { startCountdown } from '@/utils/countdown'
 import { isPasswordConfirmed } from '@/utils/register'
 
 const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
+const registerSuccessVisible = ref(false)
+const remainingSeconds = ref(3)
+let stopCountdown
+let navigating = false
 
 const form = reactive({
   username: '',
@@ -58,15 +81,36 @@ async function handleRegister() {
       username: form.username,
       password: form.password
     })
-    ElMessage.success('注册成功，请登录')
-    await router.replace('/login')
+    registerSuccessVisible.value = true
+    stopCountdown = startCountdown(
+      3,
+      (seconds) => {
+        remainingSeconds.value = seconds
+      },
+      goToLogin
+    )
   } finally {
     loading.value = false
   }
 }
+
+async function goToLogin() {
+  if (navigating) {
+    return
+  }
+
+  navigating = true
+  stopCountdown?.()
+  registerSuccessVisible.value = false
+  await router.replace('/login')
+}
+
+onBeforeUnmount(() => {
+  stopCountdown?.()
+})
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -78,6 +122,18 @@ async function handleRegister() {
 .auth-card {
   width: 100%;
   max-width: 420px;
+  border: 1px solid #9adfd5;
+  border-top: 4px solid #12a594;
+  box-shadow: 0 16px 32px rgb(18 165 148 / 16%);
+}
+
+:deep(.el-button--primary) {
+  --el-button-bg-color: #12a594;
+  --el-button-border-color: #12a594;
+  --el-button-hover-bg-color: #0e8c7e;
+  --el-button-hover-border-color: #0e8c7e;
+  --el-button-active-bg-color: #0b7369;
+  --el-button-active-border-color: #0b7369;
 }
 
 h1 {
@@ -93,6 +149,23 @@ p {
   margin-top: 16px;
   text-align: center;
   font-size: 14px;
-  color: #409eff;
+
+  :deep(a) {
+    color: #0e8c7e;
+  }
+}
+
+.register-success-message {
+  margin: 0;
+  line-height: 1.6;
+  color: #2f6f67;
+}
+
+:global(.register-success-dialog .el-dialog) {
+  border-top: 4px solid #12a594;
+}
+
+:global(.register-success-dialog .el-dialog__title) {
+  color: #0b7369;
 }
 </style>

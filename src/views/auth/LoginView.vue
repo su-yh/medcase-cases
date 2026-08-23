@@ -73,7 +73,7 @@ async function handleLogin() {
 onMounted(loadCaptcha)
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -85,6 +85,18 @@ onMounted(loadCaptcha)
 .auth-card {
   width: 100%;
   max-width: 420px;
+  border: 1px solid #a9d4ff;
+  border-top: 4px solid #409eff;
+  box-shadow: 0 16px 32px rgb(64 158 255 / 16%);
+}
+
+:deep(.el-button--primary) {
+  --el-button-bg-color: #409eff;
+  --el-button-border-color: #409eff;
+  --el-button-hover-bg-color: #337ecc;
+  --el-button-hover-border-color: #337ecc;
+  --el-button-active-bg-color: #2864a8;
+  --el-button-active-border-color: #2864a8;
 }
 
 h1 {
@@ -100,7 +112,10 @@ p {
   margin-top: 16px;
   text-align: center;
   font-size: 14px;
-  color: #409eff;
+
+  :deep(a) {
+    color: #337ecc;
+  }
 }
 
 .captcha-field {
