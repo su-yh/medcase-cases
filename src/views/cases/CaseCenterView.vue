@@ -53,7 +53,6 @@
       <el-table v-loading="loading" :data="caseList" row-key="id">
         <el-table-column label="序号" width="60" type="index" />
         <el-table-column label="标题" min-width="180" header-align="center" prop="title"/>
-        <el-table-column label="提交时间" width="180" prop="createTime"/>
         <el-table-column label="当前状态" width="190">
           <template #default="{ row }">
             <el-tag :type="getStatusTagType(row.status)" effect="light">
@@ -61,6 +60,7 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="提交时间" width="180" prop="createTime"/>
         <el-table-column label="附件" min-width="220">
           <template #default="{ row }">
             <div v-if="row.attachments.length" class="table-attachments">
@@ -77,9 +77,20 @@
             <span v-else class="empty-attachment">无附件</span>
           </template>
         </el-table-column>
-        <el-table-column label="审核/结算时间" width="180">
+        <el-table-column label="审核" width="190">
           <template #default="{ row }">
-            {{ formatDate(row.settledTime || row.reviewTime) }}
+            <div class="case-operator-info">
+              <span>{{ row.reviewerNickname || '暂无' }}</span>
+              <small>{{ formatDate(row.reviewTime) }}</small>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="结算" width="190">
+          <template #default="{ row }">
+            <div class="case-operator-info">
+              <span>{{ row.settlerNickname || '暂无' }}</span>
+              <small>{{ formatDate(row.settledTime) }}</small>
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="220" fixed="right">
@@ -392,6 +403,18 @@ p {
 
 .empty-attachment {
   color: var(--el-text-color-placeholder);
+}
+
+.case-operator-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.4;
+}
+
+.case-operator-info small {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
 }
 
 
