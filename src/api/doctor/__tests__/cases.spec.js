@@ -22,7 +22,7 @@ describe('doctor case api', () => {
     saveDraftCase(payload)
 
     expect(requestMock).toHaveBeenCalledWith({
-      url: '/doctor/cases/draft',
+      url: '/biz/doctor/cases/draft',
       method: 'post',
       data: payload
     })
@@ -34,7 +34,7 @@ describe('doctor case api', () => {
     deleteCase(42)
 
     expect(requestMock).toHaveBeenCalledWith({
-      url: '/doctor/cases/42',
+      url: '/biz/doctor/cases/42',
       method: 'delete'
     })
   })
@@ -46,7 +46,7 @@ describe('doctor case api', () => {
     getCaseDetail(42)
 
     expect(requestMock).toHaveBeenCalledWith({
-      url: '/doctor/cases/42',
+      url: '/biz/doctor/cases/42',
       method: 'get'
     })
   })
@@ -63,7 +63,7 @@ describe('doctor case api', () => {
     submitCase(payload)
 
     expect(requestMock).toHaveBeenCalledWith({
-      url: '/doctor/cases',
+      url: '/biz/doctor/cases',
       method: 'post',
       data: payload
     })

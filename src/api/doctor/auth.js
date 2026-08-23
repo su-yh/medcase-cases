@@ -8,7 +8,7 @@ export async function getCaptcha() {
 
 export function login(data) {
   return request({
-    url: '/doctor/auth/login',
+    url: '/biz/doctor/auth/login',
     method: 'post',
     data
   })
@@ -16,7 +16,7 @@ export function login(data) {
 
 export function register(data) {
   return request({
-    url: '/doctor/auth/register',
+    url: '/biz/doctor/auth/register',
     method: 'post',
     data
   })
@@ -24,7 +24,7 @@ export function register(data) {
 
 export function logout() {
   return request({
-    url: '/doctor/auth/logout',
+    url: '/biz/doctor/auth/logout',
     method: 'post'
   })
 }
