@@ -11,17 +11,17 @@ describe('doctor auth api', () => {
     await logout()
 
     expect(request).toHaveBeenNthCalledWith(1, {
-      url: '/biz/doctor/auth/login',
+      url: '/biz/doctor-auth/login',
       method: 'post',
       data: { username: 'doctor01' }
     })
     expect(request).toHaveBeenNthCalledWith(2, {
-      url: '/biz/doctor/auth/register',
+      url: '/biz/doctor-auth/register',
       method: 'post',
       data: { username: 'doctor01' }
     })
     expect(request).toHaveBeenNthCalledWith(3, {
-      url: '/biz/doctor/auth/logout',
+      url: '/biz/doctor-auth/logout',
       method: 'post'
     })
   })

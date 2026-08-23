@@ -20,7 +20,7 @@ describe('response utils', () => {
     try {
       unwrapResponse({
         code: 401,
-        msg: '请求访问：/medcase/biz/doctor/cases，认证失败，无法访问系统资源'
+        msg: '请求访问：/medcase/biz/cases，认证失败，无法访问系统资源'
       })
     } catch (error) {
       expect(error.message).toContain('认证失败')

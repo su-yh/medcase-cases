@@ -17,7 +17,7 @@ export async function uploadCaseAttachments(files) {
 
 export function submitCase(data) {
   return request({
-    url: '/biz/doctor/cases',
+    url: '/biz/cases',
     method: 'post',
     data
   })
@@ -25,7 +25,7 @@ export function submitCase(data) {
 
 export function saveDraftCase(data) {
   return request({
-    url: '/biz/doctor/cases/draft',
+    url: '/biz/cases/draft',
     method: 'post',
     data
   })
@@ -33,7 +33,7 @@ export function saveDraftCase(data) {
 
 export function getCasePage(params) {
   return request({
-    url: '/biz/doctor/cases',
+    url: '/biz/cases',
     method: 'get',
     params
   }).then(normalizeCasePage)
@@ -41,14 +41,14 @@ export function getCasePage(params) {
 
 export function getCaseDetail(id) {
   return request({
-    url: `/biz/doctor/cases/${id}`,
+    url: `/biz/cases/${id}`,
     method: 'get'
   }).then(normalizeCase)
 }
 
 export function deleteCase(id) {
   return request({
-    url: `/biz/doctor/cases/${id}`,
+    url: `/biz/cases/${id}`,
     method: 'delete'
   })
 }
