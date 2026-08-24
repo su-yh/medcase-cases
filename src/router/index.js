@@ -1,5 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getToken } from '@/utils/auth'
+import {
+  canAccessDoctorBusiness,
+  canVisitDoctorProfile,
+  getDoctorLandingPath
+} from '@/router/access'
+import useUserStore from '@/stores/user'
 import { buildTitle } from '@/utils/title'
 
 const routes = [
@@ -17,6 +23,15 @@ const routes = [
     component: () => import('@/views/auth/RegisterView.vue'),
     meta: {
       title: '注册'
+    }
+  },
+  {
+    path: '/profile',
+    name: 'DoctorProfile',
+    component: () => import('@/views/profile/DoctorProfileView.vue'),
+    meta: {
+      title: '资料提交',
+      requiresAuth: true
     }
   },
   {
@@ -59,11 +74,15 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   document.title = buildTitle(to.meta?.title)
 
-  const token = getToken()
-  if (to.meta?.requiresAuth && !token) {
+  const userStore = useUserStore()
+  const token = userStore.token || getToken()
+  if (!token) {
+    if (!to.meta?.requiresAuth) {
+      return true
+    }
     return {
       path: '/login',
       query: {
@@ -72,8 +91,34 @@ router.beforeEach((to) => {
     }
   }
 
-  if (token && to.path === '/login') {
-    return '/home'
+  if (!userStore.userInfo) {
+    try {
+      await userStore.loadProfile()
+    } catch {
+      userStore.clearSession()
+      return {
+        path: '/login',
+        query: {
+          redirect: to.fullPath
+        }
+      }
+    }
+  }
+
+  const status = userStore.userInfo?.status
+  if (to.path === '/login' || to.path === '/register') {
+    return getDoctorLandingPath(status)
+  }
+
+  if (to.path === '/profile') {
+    if (canVisitDoctorProfile(status)) {
+      return true
+    }
+    return canAccessDoctorBusiness(status) ? '/home' : '/login'
+  }
+
+  if (to.meta?.requiresAuth && !canAccessDoctorBusiness(status)) {
+    return '/profile'
   }
 
   return true

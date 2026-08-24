@@ -28,3 +28,10 @@ export function logout() {
     method: 'post'
   })
 }
+
+export function deleteAccount() {
+  return request({
+    url: '/biz/doctor-auth/account',
+    method: 'delete'
+  })
+}

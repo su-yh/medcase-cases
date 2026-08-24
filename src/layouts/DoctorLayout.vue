@@ -45,7 +45,7 @@ const router = useRouter()
 const userStore = useUserStore()
 
 async function handleLogout() {
-  userStore.logout()
+  await userStore.logout()
   await router.replace('/login')
 }
 </script>

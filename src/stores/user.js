@@ -1,5 +1,11 @@
 import { defineStore } from 'pinia'
-import { login as loginApi, logout as logoutApi, register as registerApi } from '@/api/doctor/auth'
+import {
+  deleteAccount as deleteAccountApi,
+  login as loginApi,
+  logout as logoutApi,
+  register as registerApi
+} from '@/api/doctor/auth'
+import { getMyProfile, submitProfile as submitProfileApi } from '@/api/doctor/profile'
 import { clearToken, getToken, setToken } from '@/utils/auth'
 
 const useUserStore = defineStore('doctor-user', {
@@ -12,7 +18,17 @@ const useUserStore = defineStore('doctor-user', {
       const token = await loginApi(payload)
       this.token = token
       setToken(token)
+      await this.loadProfile()
       return token
+    },
+    async loadProfile() {
+      const profile = await getMyProfile()
+      this.userInfo = profile
+      return profile
+    },
+    async submitProfile(payload) {
+      await submitProfileApi(payload)
+      return this.loadProfile()
     },
     async register(payload) {
       return registerApi(payload)
@@ -21,12 +37,19 @@ const useUserStore = defineStore('doctor-user', {
       try {
         await logoutApi()
       } catch {
-        // Local logout should still complete when the remote session is already invalid.
+        // Local logout should still complete when the remote session is invalid.
       } finally {
-        this.token = ''
-        this.userInfo = null
-        clearToken()
+        this.clearSession()
       }
+    },
+    async deleteAccount() {
+      await deleteAccountApi()
+      this.clearSession()
+    },
+    clearSession() {
+      this.token = ''
+      this.userInfo = null
+      clearToken()
     }
   }
 })
