@@ -18,6 +18,12 @@
             show-password
           />
         </el-form-item>
+        <el-form-item label="手机号">
+          <el-input v-model="form.phone" maxlength="20" placeholder="请输入手机号" />
+        </el-form-item>
+        <el-form-item label="短信验证码">
+          <el-input v-model="form.code" maxlength="4" placeholder="请输入短信验证码" />
+        </el-form-item>
         <el-button type="primary" native-type="submit" :loading="loading" style="width: 100%">
           注册
         </el-button>
@@ -66,7 +72,9 @@ let navigating = false
 const form = reactive({
   username: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  phone: '',
+  code: ''
 })
 
 async function handleRegister() {
@@ -79,7 +87,9 @@ async function handleRegister() {
   try {
     await userStore.register({
       username: form.username,
-      password: form.password
+      password: form.password,
+      phone: form.phone,
+      code: form.code
     })
     registerSuccessVisible.value = true
     stopCountdown = startCountdown(

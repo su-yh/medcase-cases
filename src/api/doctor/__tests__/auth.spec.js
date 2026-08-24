@@ -7,7 +7,12 @@ describe('doctor auth api', () => {
     const { login, register, logout, deleteAccount } = await import('@/api/doctor/auth')
 
     await login({ username: 'doctor01' })
-    await register({ username: 'doctor01' })
+    await register({
+      username: 'doctor01',
+      password: 'secret123',
+      phone: '13800000000',
+      code: '9999'
+    })
     await logout()
     await deleteAccount()
 
@@ -19,7 +24,12 @@ describe('doctor auth api', () => {
     expect(request).toHaveBeenNthCalledWith(2, {
       url: '/biz/doctor-auth/register',
       method: 'post',
-      data: { username: 'doctor01' }
+      data: {
+        username: 'doctor01',
+        password: 'secret123',
+        phone: '13800000000',
+        code: '9999'
+      }
     })
     expect(request).toHaveBeenNthCalledWith(3, {
       url: '/biz/doctor-auth/logout',
