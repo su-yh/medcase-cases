@@ -69,7 +69,7 @@
                 :key="attachment.url"
                 link
                 type="primary"
-
+                @click="previewAttachment(attachment)"
               >
                 {{ attachment.originalFilename || attachment.newFileName || attachment.fileName }}
               </el-button>
@@ -198,6 +198,7 @@ import {
   getCaseStatusLabel,
   getCaseStatusClass
 } from '@/utils/doctorCase'
+import { previewAttachment } from '@/utils/attachment'
 
 const router = useRouter()
 const loading = ref(false)
