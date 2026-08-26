@@ -27,4 +27,13 @@ describe('response utils', () => {
       expect(error.code).toBe(401)
     }
   })
+
+  it('maps common HTTP status codes to user-facing messages', async () => {
+    const { getHttpStatusMessage } = await import('@/utils/response')
+
+    expect(getHttpStatusMessage(401)).toBe('登录状态已过期，请重新登录')
+    expect(getHttpStatusMessage(403)).toBe('没有权限访问该资源')
+    expect(getHttpStatusMessage(404)).toBe('请求资源不存在')
+    expect(getHttpStatusMessage(405)).toBe('请求方法不支持')
+  })
 })

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { clearToken, getToken } from './auth'
-import { unwrapResponse } from './response'
+import { getHttpStatusMessage, unwrapResponse } from './response'
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API,
@@ -37,8 +37,11 @@ service.interceptors.response.use(
     }
   },
   (error) => {
-    const message = error.response?.data?.msg || error.message || '请求失败'
-    if (error.response?.status === 401 || error.response?.data?.code === 401) {
+    const status = error.response?.status
+    const message = error.response?.data?.msg || (status
+      ? getHttpStatusMessage(status)
+      : error.message || '请求失败')
+    if (status === 401 || error.response?.data?.code === 401) {
       handleUnauthorized()
     }
     ElMessage.error(message)
