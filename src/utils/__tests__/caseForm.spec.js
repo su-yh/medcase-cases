@@ -10,7 +10,7 @@ describe('case form helpers', () => {
   it('normalizes case details into editable form data', async () => {
     const { normalizeCaseFormData } = await import('@/utils/caseForm')
     const attachment = {
-      url: '/uploads/report.pdf',
+      filePath: '20260827/report.pdf',
       originalFilename: 'report.pdf'
     }
 
@@ -22,7 +22,7 @@ describe('case form helpers', () => {
       title: '病例标题',
       remark: '病例备注',
       attachments: [{
-        uid: 'existing-/uploads/report.pdf',
+      uid: 'existing-20260827/report.pdf',
         name: 'report.pdf',
         raw: null,
         uploading: false,
@@ -33,7 +33,7 @@ describe('case form helpers', () => {
 
   it('builds a payload from uploaded attachments only', async () => {
     const { buildCasePayload } = await import('@/utils/caseForm')
-    const attachment = { url: '/uploads/report.pdf' }
+    const attachment = { filePath: '20260827/report.pdf' }
 
     expect(buildCasePayload(
       { title: '病例标题', remark: '病例备注' },

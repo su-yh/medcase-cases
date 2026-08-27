@@ -66,12 +66,12 @@
             <div v-if="row.attachments.length" class="table-attachments">
               <el-button
                 v-for="attachment in row.attachments"
-                :key="attachment.url"
+                :key="attachment.filePath"
                 link
                 type="primary"
-                @click="previewAttachment(attachment)"
+                @click="downloadAttachment(attachment)"
               >
-                {{ attachment.originalFilename || attachment.newFileName || attachment.fileName }}
+                {{ attachment.originalFilename || attachment.filePath }}
               </el-button>
             </div>
             <span v-else class="empty-attachment">无附件</span>
@@ -167,12 +167,12 @@
           <div class="detail-attachments">
             <el-button
               v-for="attachment in detail.attachments"
-              :key="attachment.url"
+              :key="attachment.filePath"
               link
               type="primary"
-              @click="previewAttachment(attachment)"
+              @click="downloadAttachment(attachment)"
             >
-              {{ attachment.originalFilename || attachment.newFileName || attachment.fileName }}
+              {{ attachment.originalFilename || attachment.filePath }}
             </el-button>
           </div>
         </div>
@@ -198,7 +198,7 @@ import {
   getCaseStatusLabel,
   getCaseStatusClass
 } from '@/utils/doctorCase'
-import { previewAttachment } from '@/utils/attachment'
+import { downloadAttachment } from '@/utils/attachment'
 
 const router = useRouter()
 const loading = ref(false)

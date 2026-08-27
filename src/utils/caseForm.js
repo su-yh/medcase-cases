@@ -5,8 +5,8 @@ export function normalizeCaseFormData(caseItem = {}) {
     title: caseItem.title || '',
     remark: caseItem.remark || '',
     attachments: (caseItem.attachments || []).map((attachment, index) => ({
-      uid: `existing-${attachment.url || index}`,
-      name: attachment.originalFilename || attachment.newFileName || attachment.fileName || `附件${index + 1}`,
+      uid: `existing-${attachment.filePath || index}`,
+      name: attachment.originalFilename || attachment.filePath || `附件${index + 1}`,
       raw: null,
       uploading: false,
       attachment

@@ -1,8 +1,39 @@
-export function previewAttachment(attachment, openWindow = window.open) {
-  const url = attachment?.url
-  if (!url) {
+import request from '@/utils/request'
+
+export async function downloadAttachment(
+  attachment,
+  {
+    requestClient = request,
+    documentObject = typeof document !== 'undefined' ? document : null,
+    urlObject = typeof URL !== 'undefined' ? URL : null
+  } = {}
+) {
+  const filePath = attachment?.filePath
+  if (!filePath) {
     return
   }
 
-  openWindow(url, '_blank', 'noopener,noreferrer')
+  const params = { filePath }
+  if (attachment.originalFilename) {
+    params.originalFilename = attachment.originalFilename
+  }
+
+  const blob = await requestClient({
+    url: '/file/download',
+    method: 'get',
+    params,
+    responseType: 'blob'
+  })
+  if (!blob || !documentObject || !urlObject) {
+    return
+  }
+
+  const objectUrl = urlObject.createObjectURL(blob)
+  const anchor = documentObject.createElement('a')
+  anchor.href = objectUrl
+  anchor.download = attachment.originalFilename || filePath.split('/').pop() || '附件'
+  documentObject.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  urlObject.revokeObjectURL(objectUrl)
 }

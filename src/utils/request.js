@@ -24,8 +24,17 @@ function handleUnauthorized() {
   }
 }
 
+function isBinaryResponse(response) {
+  const responseType = response?.config?.responseType
+  return responseType === 'blob' || responseType === 'arraybuffer'
+}
+
 service.interceptors.response.use(
   (response) => {
+    if (isBinaryResponse(response)) {
+      return response.data
+    }
+
     try {
       return unwrapResponse(response.data)
     } catch (error) {

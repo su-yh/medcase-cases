@@ -1,16 +1,18 @@
 import request from '@/utils/request'
 
 export async function uploadCaseAttachments(files) {
-  const formData = new FormData()
-  files.forEach(file => formData.append('files', file))
-  const response = await request({
-    url: '/common/uploads',
-    method: 'post',
-    data: formData
-  })
-  return response.map(file => ({
-    url: file.url,
-    newFileName: file.newFileName,
+  const uploadedFiles = await Promise.all(files.map(file => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request({
+      url: '/file/upload/case',
+      method: 'post',
+      data: formData
+    })
+  }))
+
+  return uploadedFiles.map(file => ({
+    filePath: file.filePath,
     originalFilename: file.originalFilename
   }))
 }

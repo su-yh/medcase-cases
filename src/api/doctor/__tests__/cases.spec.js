@@ -11,6 +11,46 @@ describe('doctor case api', () => {
     requestMock.mockReset()
   })
 
+  it('uploads each case attachment through the single-file storage endpoint', async () => {
+    const { uploadCaseAttachments } = await import('@/api/doctor/cases')
+    const files = [
+      new File(['first'], 'first.pdf', { type: 'application/pdf' }),
+      new File(['second'], 'second.pdf', { type: 'application/pdf' })
+    ]
+    requestMock
+      .mockResolvedValueOnce({
+        filePath: 'attachments/first.pdf',
+        originalFilename: 'first.pdf'
+      })
+      .mockResolvedValueOnce({
+        filePath: 'attachments/second.pdf',
+        originalFilename: 'second.pdf'
+      })
+
+    const result = await uploadCaseAttachments(files)
+
+    expect(requestMock).toHaveBeenCalledTimes(2)
+    requestMock.mock.calls.forEach(([config], index) => {
+      expect(config).toMatchObject({
+        url: '/file/upload/case',
+        method: 'post'
+      })
+      expect(config.data).toBeInstanceOf(FormData)
+      expect(config.data.get('file')).toBe(files[index])
+      expect(config.data.has('business')).toBe(false)
+    })
+    expect(result).toEqual([
+      {
+        filePath: 'attachments/first.pdf',
+        originalFilename: 'first.pdf'
+      },
+      {
+        filePath: 'attachments/second.pdf',
+        originalFilename: 'second.pdf'
+      }
+    ])
+  })
+
   it('saves a new case draft through the draft endpoint', async () => {
     const { saveDraftCase } = await import('@/api/doctor/cases')
     const payload = {
