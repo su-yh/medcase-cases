@@ -32,8 +32,9 @@ describe('doctor case api', () => {
     expect(requestMock).toHaveBeenCalledTimes(2)
     requestMock.mock.calls.forEach(([config], index) => {
       expect(config).toMatchObject({
-        url: '/file/upload/case',
-        method: 'post'
+        url: '/file/upload',
+        method: 'post',
+        params: { business: 'case' }
       })
       expect(config.data).toBeInstanceOf(FormData)
       expect(config.data.get('file')).toBe(files[index])

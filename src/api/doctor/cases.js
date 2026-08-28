@@ -5,8 +5,9 @@ export async function uploadCaseAttachments(files) {
     const formData = new FormData()
     formData.append('file', file)
     return request({
-      url: '/file/upload/case',
+      url: '/file/upload',
       method: 'post',
+      params: { business: 'case' },
       data: formData
     })
   }))
