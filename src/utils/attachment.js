@@ -1,5 +1,24 @@
 import request from '@/utils/request'
 
+export function fetchAttachmentBlob(attachment, requestClient = request) {
+  const filePath = attachment?.filePath
+  if (!filePath) {
+    return Promise.resolve(null)
+  }
+
+  const params = { filePath }
+  if (attachment.originalFilename) {
+    params.originalFilename = attachment.originalFilename
+  }
+
+  return requestClient({
+    url: '/file/download',
+    method: 'get',
+    params,
+    responseType: 'blob'
+  })
+}
+
 export async function downloadAttachment(
   attachment,
   {
@@ -13,17 +32,7 @@ export async function downloadAttachment(
     return
   }
 
-  const params = { filePath }
-  if (attachment.originalFilename) {
-    params.originalFilename = attachment.originalFilename
-  }
-
-  const blob = await requestClient({
-    url: '/file/download',
-    method: 'get',
-    params,
-    responseType: 'blob'
-  })
+  const blob = await fetchAttachmentBlob(attachment, requestClient)
   if (!blob || !documentObject || !urlObject) {
     return
   }

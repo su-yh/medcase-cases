@@ -621,10 +621,20 @@
   resolved "https://registry.npmmirror.com/@vue-office/docx/-/docx-1.6.3.tgz#0c183b13553c029fea702eb8b8b4260a7e1f0961"
   integrity sha512-Cs+3CAaRBOWOiW4XAhTwwxJ0dy8cPIf6DqfNvYcD3YACiLwO4kuawLF2IAXxyijhbuOeoFsfvoVbOc16A/4bZA==
 
+"@vue-office/excel@1.7.14":
+  version "1.7.14"
+  resolved "https://registry.npmmirror.com/@vue-office/excel/-/excel-1.7.14.tgz#6e1446abae9690a09eed6f5e8c09bb923b3d5b10"
+  integrity sha512-pVUgt+emDQUnW7q22CfnQ+jl43mM/7IFwYzOg7lwOwPEbiVB4K4qEQf+y/bc4xGXz75w1/e3Kz3G6wAafmFBFg==
+
 "@vue-office/pdf@^2.0.10":
   version "2.0.10"
   resolved "https://registry.npmmirror.com/@vue-office/pdf/-/pdf-2.0.10.tgz#2d85e449c017289084e64dc029613d05767afa5c"
   integrity sha512-yHVLrMAKpMPBkhBwofFyGEtEeJF0Zd7oGmf56Pe5aj/xObdRq3E1CIZqTqhWJNgHV8oLQqaX0vs4p5T1zq+GIA==
+
+"@vue-office/pptx@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmmirror.com/@vue-office/pptx/-/pptx-1.0.1.tgz#f34d5a7aa78cd534c5724540dbe53f0539e94b3e"
+  integrity sha512-+V7Kctzl6f6+Yk4NaD/wQGRIkqLWcowe0jEhPexWQb8Oilbzt1OyhWRWcMsxNDTdrgm6aMLP+0/tmw27cxddMg==
 
 "@vue/compiler-core@3.5.26":
   version "3.5.26"
@@ -1595,7 +1605,7 @@ vitest@2.1.9:
     vite-node "2.1.9"
     why-is-node-running "^2.3.0"
 
-vue-demi@>=0.14.8:
+vue-demi@0.14.10, vue-demi@>=0.14.8:
   version "0.14.10"
   resolved "https://registry.npmmirror.com/vue-demi/-/vue-demi-0.14.10.tgz#afc78de3d6f9e11bf78c55e8510ee12814522f04"
   integrity sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==

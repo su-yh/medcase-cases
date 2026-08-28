@@ -69,7 +69,7 @@
                 :key="attachment.filePath"
                 link
                 type="primary"
-                @click="downloadAttachment(attachment)"
+                @click="openPreview(attachment)"
               >
                 {{ attachment.originalFilename || attachment.filePath }}
               </el-button>
@@ -170,7 +170,7 @@
               :key="attachment.filePath"
               link
               type="primary"
-              @click="downloadAttachment(attachment)"
+              @click="openPreview(attachment)"
             >
               {{ attachment.originalFilename || attachment.filePath }}
             </el-button>
@@ -184,6 +184,11 @@
       :case-item="editingCase"
       @changed="handleCaseChanged"
     />
+
+    <AttachmentPreviewDialog
+      v-model="previewVisible"
+      :attachment="previewAttachment"
+    />
   </div>
 </template>
 
@@ -193,12 +198,12 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { deleteCase, getCasePage } from '@/api/doctor/cases'
 import CaseEditDialog from '@/components/cases/CaseEditDialog.vue'
+import AttachmentPreviewDialog from '@/components/attachments/AttachmentPreviewDialog.vue'
 import {
   CASE_STATUS_TABS,
   getCaseStatusLabel,
   getCaseStatusClass
 } from '@/utils/doctorCase'
-import { downloadAttachment } from '@/utils/attachment'
 
 const router = useRouter()
 const loading = ref(false)
@@ -215,6 +220,8 @@ const detailVisible = ref(false)
 const detail = ref(null)
 const editVisible = ref(false)
 const editingCase = ref(null)
+const previewVisible = ref(false)
+const previewAttachment = ref(null)
 
 const statusTagTypes = {
   draft: 'info',
@@ -276,6 +283,11 @@ async function resetSearch() {
 function openDetail(caseItem) {
   detail.value = caseItem
   detailVisible.value = true
+}
+
+function openPreview(attachment) {
+  previewAttachment.value = attachment
+  previewVisible.value = true
 }
 
 function openEdit(caseItem) {
