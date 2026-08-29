@@ -15,7 +15,7 @@ export default defineConfig(({ command, mode }) => {
   }
 
   return {
-    base: '/',
+    base: env.VITE_APP_BASE_PATH || '/',
     plugins: [vue()],
     resolve: {
       alias: {

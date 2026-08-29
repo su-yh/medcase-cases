@@ -20,7 +20,7 @@
         <span class="doctor-avatar">医</span>
         <span>
           <strong>医生账号</strong>
-          <small>MedCase</small>
+          <small>MedCase v{{ appVersion }}</small>
         </span>
       </div>
     </aside>
@@ -40,9 +40,11 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
+import { APP_VERSION } from '@/utils/version'
 
 const router = useRouter()
 const userStore = useUserStore()
+const appVersion = APP_VERSION
 
 async function handleLogout() {
   await userStore.logout()
