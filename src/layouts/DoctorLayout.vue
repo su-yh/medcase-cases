@@ -20,7 +20,8 @@
         <span class="doctor-avatar">医</span>
         <span>
           <strong>医生账号</strong>
-          <small>MedCase v{{ appVersion }}</small>
+          <small>前端 v{{ appVersion }}</small>
+          <small>后端 v{{ backendVersion }}</small>
         </span>
       </div>
     </aside>
@@ -38,13 +39,27 @@
 </template>
 
 <script setup>
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import { APP_VERSION } from '@/utils/version'
+import { getSystemVersion } from '@/api/system/version'
 
 const router = useRouter()
 const userStore = useUserStore()
 const appVersion = APP_VERSION
+const backendVersion = ref('unknown')
+
+async function loadBackendVersion() {
+  try {
+    const result = await getSystemVersion()
+    backendVersion.value = result?.version || 'unknown'
+  } catch (error) {
+    backendVersion.value = 'unknown'
+  }
+}
+
+onMounted(loadBackendVersion)
 
 async function handleLogout() {
   await userStore.logout()
