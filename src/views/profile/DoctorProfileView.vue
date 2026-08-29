@@ -25,11 +25,27 @@
           <span v-if="reviewFailed" class="profile-state-label">审核未通过</span>
           <h1>{{ reviewFailed ? '重新提交资料' : '完善医生资料' }}</h1>
           <p>{{ reviewFailed ? '请更新资料后重新提交审核。' : '请填写基本资料后提交管理员审核。' }}</p>
+          <el-alert
+            v-if="reviewFailed && userStore.userInfo?.reviewReason"
+            class="review-reason"
+            title="审核拒绝原因"
+            :description="userStore.userInfo.reviewReason"
+            type="error"
+            :closable="false"
+            show-icon
+          />
         </header>
 
         <el-form label-position="top" @submit.prevent="handleSubmit">
           <el-form-item label="姓名" required>
             <el-input v-model="form.nickName" maxlength="30" show-word-limit placeholder="请输入姓名" />
+          </el-form-item>
+          <el-form-item label="性别" required>
+            <el-select v-model="form.sex" placeholder="请选择性别" style="width: 100%">
+              <el-option label="男" value="0" />
+              <el-option label="女" value="1" />
+              <el-option label="未知" value="2" />
+            </el-select>
           </el-form-item>
           <el-form-item label="手机号" required>
             <el-input v-model="form.phone" maxlength="20" placeholder="请输入手机号" />
@@ -156,6 +172,7 @@ const previewAttachment = ref(null)
 const fieldUploading = ref('')
 const form = reactive({
   nickName: '',
+  sex: '',
   phone: '',
   idCardNumber: '',
   title: '',
@@ -174,6 +191,7 @@ async function loadProfile() {
   try {
     const profile = await userStore.loadProfile()
     form.nickName = profile?.nickName || ''
+    form.sex = profile?.sex || ''
     form.phone = profile?.phone || ''
     form.idCardNumber = profile?.idCardNumber || ''
     form.title = profile?.title || ''
@@ -194,10 +212,15 @@ async function handleSubmit() {
     ElMessage.warning('请先上传身份证和资格证图片')
     return
   }
+  if (!form.sex) {
+    ElMessage.warning('请选择性别')
+    return
+  }
   submitting.value = true
   try {
     await userStore.submitProfile({
       nickName: form.nickName,
+      sex: form.sex,
       phone: form.phone,
       idCardNumber: form.idCardNumber,
       title: form.title,
@@ -274,6 +297,7 @@ onMounted(async () => {
     return
   }
   form.nickName = userStore.userInfo.nickName || ''
+  form.sex = userStore.userInfo.sex || ''
   form.phone = userStore.userInfo.phone || ''
   form.idCardNumber = userStore.userInfo.idCardNumber || ''
   form.title = userStore.userInfo.title || ''
@@ -312,6 +336,10 @@ onMounted(async () => {
     color: var(--el-text-color-secondary);
     line-height: 1.6;
   }
+}
+
+.review-reason {
+  margin-top: 16px;
 }
 
 .profile-state-label {

@@ -30,6 +30,13 @@
         <el-form-item label="姓名" prop="nickName" required>
           <el-input v-model="form.nickName" maxlength="30" placeholder="请输入姓名" />
         </el-form-item>
+        <el-form-item label="性别" prop="sex" required>
+          <el-select v-model="form.sex" placeholder="请选择性别" style="width: 100%">
+            <el-option label="男" value="0" />
+            <el-option label="女" value="1" />
+            <el-option label="未知" value="2" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="身份证号码" prop="idCardNumber" required>
           <el-input v-model="form.idCardNumber" maxlength="30" placeholder="请输入身份证号码" />
         </el-form-item>
@@ -134,6 +141,7 @@ const form = reactive({
   confirmPassword: '',
   phone: '',
   nickName: '',
+  sex: '',
   idCardNumber: '',
   title: '',
   inviteCode: '9999',
@@ -164,6 +172,7 @@ const rules = {
   ],
   phone: requiredRule('手机号'),
   nickName: requiredRule('姓名'),
+  sex: requiredRule('性别'),
   idCardNumber: requiredRule('身份证号码'),
   title: requiredRule('职称'),
   inviteCode: requiredRule('邀请码'),
@@ -214,6 +223,7 @@ async function handleRegister() {
       password: form.password,
       phone: form.phone,
       nickName: form.nickName,
+      sex: form.sex,
       idCardNumber: form.idCardNumber,
       title: form.title,
       inviteCode: form.inviteCode,

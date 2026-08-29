@@ -26,6 +26,7 @@ describe('doctor profile api', () => {
     const { submitProfile } = await import('@/api/doctor/profile')
     const payload = {
       nickName: '张医生',
+      sex: '1',
       phone: '13800000000',
       idCardNumber: '110101199001011234',
       title: '主治医师',
