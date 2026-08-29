@@ -25,8 +25,13 @@ describe('doctor profile api', () => {
   it('submits the current doctor profile', async () => {
     const { submitProfile } = await import('@/api/doctor/profile')
     const payload = {
-      name: '张医生',
-      phone: '13800000000'
+      nickName: '张医生',
+      phone: '13800000000',
+      idCardNumber: '110101199001011234',
+      title: '主治医师',
+      idCardFront: { filePath: 'front.png' },
+      idCardBack: { filePath: 'back.png' },
+      qualificationCertificate: { filePath: 'qualification.png' }
     }
 
     submitProfile(payload)
@@ -36,5 +41,19 @@ describe('doctor profile api', () => {
       method: 'post',
       data: payload
     })
+  })
+
+  it('uploads doctor profile attachments through the storage endpoint', async () => {
+    const { uploadProfileAttachment } = await import('@/api/doctor/profile')
+    const file = new Blob(['front'], { type: 'image/png' })
+
+    uploadProfileAttachment(file)
+
+    const requestConfig = requestMock.mock.calls[0][0]
+    expect(requestConfig.url).toBe('/file/upload')
+    expect(requestConfig.method).toBe('post')
+    expect(requestConfig.params).toEqual({ business: 'doctor-register' })
+    expect(requestConfig.data).toBeInstanceOf(FormData)
+    expect(requestConfig.data.get('file')).toBeInstanceOf(Blob)
   })
 })

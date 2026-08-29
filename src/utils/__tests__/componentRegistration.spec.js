@@ -12,4 +12,9 @@ describe('Element Plus component registration', () => {
     expect(mainSource).toContain('ElDatePicker')
     expect(mainSource).toContain('app.component(ElDatePicker.name, ElDatePicker)')
   })
+
+  it('registers the upload component used by profile and registration pages', () => {
+    expect(mainSource).toContain('ElUpload')
+    expect(mainSource).toContain('app.component(ElUpload.name, ElUpload)')
+  })
 })

@@ -12,7 +12,8 @@ import {
   ElPagination,
   ElTable,
   ElTableColumn,
-  ElTag
+  ElTag,
+  ElUpload
 } from 'element-plus'
 import 'element-plus/dist/index.css'
 import { createPinia } from 'pinia'
@@ -38,6 +39,7 @@ app.component(ElPagination.name, ElPagination)
 app.component(ElTable.name, ElTable)
 app.component(ElTableColumn.name, ElTableColumn)
 app.component(ElTag.name, ElTag)
+app.component(ElUpload.name, ElUpload)
 app.directive('loading', ElLoading)
 
 app.mount('#app')

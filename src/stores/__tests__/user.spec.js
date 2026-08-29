@@ -74,7 +74,7 @@ describe('doctor user store', () => {
     loginApi.mockResolvedValue('doctor-token')
     getMyProfile.mockResolvedValue({
       id: 12,
-      name: '张医生',
+      nickName: '张医生',
       phone: '13800000000',
       status: '5'
     })
@@ -90,7 +90,7 @@ describe('doctor user store', () => {
     expect(getMyProfile).toHaveBeenCalledTimes(1)
     expect(store.userInfo).toEqual({
       id: 12,
-      name: '张医生',
+      nickName: '张医生',
       phone: '13800000000',
       status: '5'
     })

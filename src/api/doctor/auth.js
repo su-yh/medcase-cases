@@ -23,6 +23,17 @@ export function register(data) {
   })
 }
 
+export function uploadDoctorRegistrationAttachment(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  return request({
+    url: '/file/upload/doctor-register',
+    method: 'post',
+    data: formData
+  })
+}
+
 export function logout() {
   return request({
     url: '/biz/doctor-auth/logout',

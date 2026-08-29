@@ -3,14 +3,20 @@
     <el-card class="auth-card" shadow="always">
       <h1>医生端注册</h1>
       <p>创建 MedCase 医生端账号。</p>
-      <el-form label-position="top" @submit.prevent="handleRegister">
-        <el-form-item label="用户名">
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-position="top"
+        @submit.prevent="handleRegister"
+      >
+        <el-form-item label="用户名" prop="username" required>
           <el-input v-model="form.username" placeholder="请输入用户名" />
         </el-form-item>
-        <el-form-item label="密码">
+        <el-form-item label="密码" prop="password" required>
           <el-input v-model="form.password" type="password" placeholder="请输入密码" show-password />
         </el-form-item>
-        <el-form-item label="确认密码">
+        <el-form-item label="确认密码" prop="confirmPassword" required>
           <el-input
             v-model="form.confirmPassword"
             type="password"
@@ -18,11 +24,61 @@
             show-password
           />
         </el-form-item>
-        <el-form-item label="手机号">
+        <el-form-item label="手机号" prop="phone" required>
           <el-input v-model="form.phone" maxlength="20" placeholder="请输入手机号" />
         </el-form-item>
-        <el-form-item label="短信验证码">
-          <el-input v-model="form.code" maxlength="4" placeholder="请输入短信验证码" />
+        <el-form-item label="姓名" prop="nickName" required>
+          <el-input v-model="form.nickName" maxlength="30" placeholder="请输入姓名" />
+        </el-form-item>
+        <el-form-item label="身份证号码" prop="idCardNumber" required>
+          <el-input v-model="form.idCardNumber" maxlength="30" placeholder="请输入身份证号码" />
+        </el-form-item>
+        <el-form-item label="职称" prop="title" required>
+          <el-input v-model="form.title" maxlength="50" placeholder="请输入职称" />
+        </el-form-item>
+        <el-form-item label="邀请码" prop="inviteCode" required>
+          <el-input v-model="form.inviteCode" readonly />
+        </el-form-item>
+        <el-form-item label="身份证正面图片" prop="idCardFront" required>
+          <el-upload
+            :limit="1"
+            :show-file-list="false"
+            :auto-upload="false"
+            :disabled="uploadingField === 'idCardFront'"
+            :on-change="file => handleFileChange('idCardFront', file)"
+            accept="image/*"
+          >
+            <el-button :loading="uploadingField === 'idCardFront'">选择图片</el-button>
+          </el-upload>
+          <span class="upload-name">{{ attachmentName(form.idCardFront) }}</span>
+        </el-form-item>
+        <el-form-item label="身份证反面图片" prop="idCardBack" required>
+          <el-upload
+            :limit="1"
+            :show-file-list="false"
+            :auto-upload="false"
+            :disabled="uploadingField === 'idCardBack'"
+            :on-change="file => handleFileChange('idCardBack', file)"
+            accept="image/*"
+          >
+            <el-button :loading="uploadingField === 'idCardBack'">选择图片</el-button>
+          </el-upload>
+          <span class="upload-name">{{ attachmentName(form.idCardBack) }}</span>
+        </el-form-item>
+        <el-form-item label="医师职业资格证图片" prop="qualificationCertificate" required>
+          <el-upload
+            :limit="1"
+            :show-file-list="false"
+            :auto-upload="false"
+            :disabled="uploadingField === 'qualificationCertificate'"
+            :on-change="file => handleFileChange('qualificationCertificate', file)"
+            accept="image/*"
+          >
+            <el-button :loading="uploadingField === 'qualificationCertificate'">
+              选择图片
+            </el-button>
+          </el-upload>
+          <span class="upload-name">{{ attachmentName(form.qualificationCertificate) }}</span>
         </el-form-item>
         <el-button type="primary" native-type="submit" :loading="loading" style="width: 100%">
           注册
@@ -60,10 +116,13 @@ import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import { startCountdown } from '@/utils/countdown'
 import { isPasswordConfirmed } from '@/utils/register'
+import { uploadDoctorRegistrationAttachment } from '@/api/doctor/auth'
 
 const router = useRouter()
 const userStore = useUserStore()
+const formRef = ref()
 const loading = ref(false)
+const uploadingField = ref('')
 const registerSuccessVisible = ref(false)
 const remainingSeconds = ref(3)
 let stopCountdown
@@ -74,12 +133,77 @@ const form = reactive({
   password: '',
   confirmPassword: '',
   phone: '',
-  code: ''
+  nickName: '',
+  idCardNumber: '',
+  title: '',
+  inviteCode: '9999',
+  idCardFront: null,
+  idCardBack: null,
+  qualificationCertificate: null
 })
 
+const requiredRule = (label) => [
+  { required: true, message: `请输入${label}`, trigger: 'blur' }
+]
+
+const rules = {
+  username: requiredRule('用户名'),
+  password: requiredRule('密码'),
+  confirmPassword: [
+    { required: true, message: '请再次输入密码', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        if (isPasswordConfirmed(form.password, value)) {
+          callback()
+          return
+        }
+        callback(new Error('两次输入的密码不一致'))
+      },
+      trigger: 'blur'
+    }
+  ],
+  phone: requiredRule('手机号'),
+  nickName: requiredRule('姓名'),
+  idCardNumber: requiredRule('身份证号码'),
+  title: requiredRule('职称'),
+  inviteCode: requiredRule('邀请码'),
+  idCardFront: [{ required: true, message: '请上传身份证正面图片', trigger: 'change' }],
+  idCardBack: [{ required: true, message: '请上传身份证反面图片', trigger: 'change' }],
+  qualificationCertificate: [
+    { required: true, message: '请上传医师职业资格证图片', trigger: 'change' }
+  ]
+}
+
+async function handleFileChange(field, uploadFile) {
+  const file = uploadFile?.raw
+  if (!file) {
+    return
+  }
+
+  uploadingField.value = field
+  try {
+    form[field] = await uploadDoctorRegistrationAttachment(file)
+    await formRef.value?.validateField(field)
+  } catch (error) {
+    form[field] = null
+    ElMessage.error(error.message || '证件图片上传失败')
+  } finally {
+    uploadingField.value = ''
+  }
+}
+
+function attachmentName(attachment) {
+  return attachment?.originalFilename || attachment?.filePath || '未上传'
+}
+
 async function handleRegister() {
-  if (!isPasswordConfirmed(form.password, form.confirmPassword)) {
-    ElMessage.error('两次输入的密码不一致')
+  if (uploadingField.value) {
+    ElMessage.warning('请等待证件图片上传完成')
+    return
+  }
+
+  const valid = await formRef.value?.validate().catch(() => false)
+  if (!valid) {
     return
   }
 
@@ -89,7 +213,13 @@ async function handleRegister() {
       username: form.username,
       password: form.password,
       phone: form.phone,
-      code: form.code
+      nickName: form.nickName,
+      idCardNumber: form.idCardNumber,
+      title: form.title,
+      inviteCode: form.inviteCode,
+      idCardFront: form.idCardFront,
+      idCardBack: form.idCardBack,
+      qualificationCertificate: form.qualificationCertificate
     })
     registerSuccessVisible.value = true
     stopCountdown = startCountdown(
@@ -163,6 +293,13 @@ p {
   :deep(a) {
     color: #0e8c7e;
   }
+}
+
+.upload-name {
+  display: block;
+  margin-top: 6px;
+  color: #667085;
+  font-size: 13px;
 }
 
 .register-success-message {

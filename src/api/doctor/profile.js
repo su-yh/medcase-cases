@@ -14,3 +14,15 @@ export function submitProfile(data) {
     data
   })
 }
+
+export function uploadProfileAttachment(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  return request({
+    url: '/file/upload',
+    method: 'post',
+    params: { business: 'doctor-register' },
+    data: formData
+  })
+}
