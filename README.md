@@ -31,6 +31,12 @@ yarn dev
 开发代理地址需要在 `.env.development` 里配置 `VITE_DEV_SERVER_PROXY`。
 后端访问前缀按环境配置在各 `.env.*` 文件的 `VITE_APP_BASE_API` 中，当前示例包含 `/medcase` context-path。
 
+## 预发布构建
+
+```bash
+yarn build:stage
+```
+
 ## 生产构建
 
 ```bash

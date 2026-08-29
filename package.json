@@ -8,6 +8,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "build:prod": "vite build --mode production",
+    "build:stage": "vite build --mode staging",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run"
   },
