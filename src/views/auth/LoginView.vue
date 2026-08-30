@@ -10,7 +10,7 @@
         <el-form-item label="密码">
           <el-input v-model="form.password" type="password" placeholder="请输入密码" show-password />
         </el-form-item>
-        <el-form-item v-if="captchaEnabled" label="验证码">
+        <el-form-item label="验证码">
           <div class="captcha-field">
             <el-input v-model="form.code" placeholder="请输入验证码" />
             <img
@@ -43,7 +43,6 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
-const captchaEnabled = ref(false)
 const captchaImage = ref('')
 
 const form = reactive({
@@ -55,7 +54,6 @@ const form = reactive({
 
 async function loadCaptcha() {
   const result = await getCaptcha()
-  captchaEnabled.value = result.captchaEnabled
   form.uuid = result.uuid || ''
   captchaImage.value = result.img ? `data:image/jpeg;base64,${result.img}` : ''
 }
