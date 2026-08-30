@@ -5,6 +5,7 @@
       <p>创建 MedCase 医生端账号。</p>
       <el-form
         ref="formRef"
+        class="register-form-grid"
         :model="form"
         :rules="rules"
         label-position="top"
@@ -25,7 +26,20 @@
           />
         </el-form-item>
         <el-form-item label="手机号" prop="phone" required>
-          <el-input v-model="form.phone" maxlength="20" placeholder="请输入手机号" />
+          <el-input v-model="form.phone" type="tel" maxlength="11" placeholder="请输入手机号" />
+        </el-form-item>
+        <el-form-item label="短信验证码" prop="smsCode" required>
+          <div class="sms-code-field">
+            <el-input v-model="form.smsCode" maxlength="6" placeholder="请输入验证码" />
+            <el-button
+              type="primary"
+              :disabled="smsCodeSending || smsCountdown > 0"
+              :loading="smsCodeSending"
+              @click="handleSendSmsCode"
+            >
+              {{ smsCountdown > 0 ? `${smsCountdown} 秒后重发` : '获取验证码' }}
+            </el-button>
+          </div>
         </el-form-item>
         <el-form-item label="姓名" prop="nickName" required>
           <el-input v-model="form.nickName" maxlength="30" placeholder="请输入姓名" />
@@ -87,7 +101,7 @@
           </el-upload>
           <span class="upload-name">{{ attachmentName(form.qualificationCertificate) }}</span>
         </el-form-item>
-        <el-button type="primary" native-type="submit" :loading="loading" style="width: 100%">
+        <el-button class="register-submit" type="primary" native-type="submit" :loading="loading">
           注册
         </el-button>
       </el-form>
@@ -123,16 +137,19 @@ import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import { startCountdown } from '@/utils/countdown'
 import { isPasswordConfirmed } from '@/utils/register'
-import { uploadDoctorRegistrationAttachment } from '@/api/doctor/auth'
+import { sendRegisterSmsCode, uploadDoctorRegistrationAttachment } from '@/api/doctor/auth'
 
 const router = useRouter()
 const userStore = useUserStore()
 const formRef = ref()
 const loading = ref(false)
 const uploadingField = ref('')
+const smsCodeSending = ref(false)
+const smsCountdown = ref(0)
 const registerSuccessVisible = ref(false)
 const remainingSeconds = ref(3)
 let stopCountdown
+let stopSmsCountdown
 let navigating = false
 
 const form = reactive({
@@ -140,6 +157,7 @@ const form = reactive({
   password: '',
   confirmPassword: '',
   phone: '',
+  smsCode: '999999',
   nickName: '',
   sex: '',
   idCardNumber: '',
@@ -170,7 +188,14 @@ const rules = {
       trigger: 'blur'
     }
   ],
-  phone: requiredRule('手机号'),
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+  ],
+  smsCode: [
+    { required: true, message: '请输入短信验证码', trigger: 'blur' },
+    { pattern: /^\d{6}$/, message: '短信验证码为6位数字', trigger: 'blur' }
+  ],
   nickName: requiredRule('姓名'),
   sex: requiredRule('性别'),
   idCardNumber: requiredRule('身份证号码'),
@@ -181,6 +206,35 @@ const rules = {
   qualificationCertificate: [
     { required: true, message: '请上传医师职业资格证图片', trigger: 'change' }
   ]
+}
+
+async function handleSendSmsCode() {
+  if (smsCodeSending.value || smsCountdown.value > 0) {
+    return
+  }
+
+  const valid = await formRef.value?.validateField('phone').catch(() => false)
+  if (!valid) {
+    return
+  }
+
+  smsCodeSending.value = true
+  try {
+    await sendRegisterSmsCode(form.phone)
+    ElMessage.success('验证码已发送')
+    stopSmsCountdown?.()
+    stopSmsCountdown = startCountdown(
+      60,
+      (seconds) => {
+        smsCountdown.value = seconds
+      },
+      () => {
+        smsCountdown.value = 0
+      }
+    )
+  } finally {
+    smsCodeSending.value = false
+  }
 }
 
 async function handleFileChange(field, uploadFile) {
@@ -222,6 +276,7 @@ async function handleRegister() {
       username: form.username,
       password: form.password,
       phone: form.phone,
+      smsCode: form.smsCode,
       nickName: form.nickName,
       sex: form.sex,
       idCardNumber: form.idCardNumber,
@@ -257,6 +312,7 @@ async function goToLogin() {
 
 onBeforeUnmount(() => {
   stopCountdown?.()
+  stopSmsCountdown?.()
 })
 </script>
 
@@ -271,7 +327,7 @@ onBeforeUnmount(() => {
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 880px;
   border: 1px solid #9adfd5;
   border-top: 4px solid #12a594;
   box-shadow: 0 16px 32px rgb(18 165 148 / 16%);
@@ -305,6 +361,30 @@ p {
   }
 }
 
+.register-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 20px;
+}
+
+.sms-code-field {
+  display: flex;
+  gap: 8px;
+
+  :deep(.el-input) {
+    min-width: 0;
+  }
+
+  :deep(.el-button) {
+    flex: 0 0 124px;
+  }
+}
+
+.register-submit {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
 .upload-name {
   display: block;
   margin-top: 6px;
@@ -324,5 +404,24 @@ p {
 
 :global(.register-success-dialog .el-dialog__title) {
   color: #0b7369;
+}
+
+@media (max-width: 767px) {
+  .auth-page {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .auth-card {
+    max-width: 420px;
+  }
+
+  .register-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .register-submit {
+    grid-column: auto;
+  }
 }
 </style>

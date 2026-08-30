@@ -10,6 +10,8 @@ import {
   ElInput,
   ElLoading,
   ElPagination,
+  ElOption,
+  ElSelect,
   ElTable,
   ElTableColumn,
   ElTag,
@@ -36,6 +38,8 @@ app.component(ElForm.name, ElForm)
 app.component(ElFormItem.name, ElFormItem)
 app.component(ElInput.name, ElInput)
 app.component(ElPagination.name, ElPagination)
+app.component(ElOption.name, ElOption)
+app.component(ElSelect.name, ElSelect)
 app.component(ElTable.name, ElTable)
 app.component(ElTableColumn.name, ElTableColumn)
 app.component(ElTag.name, ElTag)

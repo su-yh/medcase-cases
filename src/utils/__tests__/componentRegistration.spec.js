@@ -17,4 +17,11 @@ describe('Element Plus component registration', () => {
     expect(mainSource).toContain('ElUpload')
     expect(mainSource).toContain('app.component(ElUpload.name, ElUpload)')
   })
+
+  it('registers the select components used by doctor registration', () => {
+    expect(mainSource).toContain('ElSelect')
+    expect(mainSource).toContain('ElOption')
+    expect(mainSource).toContain('app.component(ElSelect.name, ElSelect)')
+    expect(mainSource).toContain('app.component(ElOption.name, ElOption)')
+  })
 })

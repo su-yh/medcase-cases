@@ -13,9 +13,10 @@ describe('doctor auth api', () => {
   })
 
   it('uses the biz doctor auth routes', async () => {
-    const { login, register, logout, deleteAccount } = await import('@/api/doctor/auth')
+    const { login, register, sendRegisterSmsCode, logout, deleteAccount } = await import('@/api/doctor/auth')
 
     await login({ username: 'doctor01' })
+    await sendRegisterSmsCode('13800000000')
     await register({
       username: 'doctor01',
       password: 'secret123',
@@ -25,6 +26,7 @@ describe('doctor auth api', () => {
       idCardNumber: '110101199001011234',
       title: '主治医师',
       inviteCode: '9999',
+      smsCode: '123456',
       idCardFront: { filePath: 'front.png' },
       idCardBack: { filePath: 'back.png' },
       qualificationCertificate: { filePath: 'qualification.png' }
@@ -37,7 +39,12 @@ describe('doctor auth api', () => {
       method: 'post',
       data: { username: 'doctor01' }
     })
-    const registerRequest = requestMock.mock.calls[1][0]
+    expect(requestMock).toHaveBeenNthCalledWith(2, {
+      url: '/biz/doctor-auth/register/sms-code',
+      method: 'post',
+      data: { phone: '13800000000' }
+    })
+    const registerRequest = requestMock.mock.calls[2][0]
     expect(registerRequest.url).toBe('/biz/doctor-auth/register')
     expect(registerRequest.method).toBe('post')
     expect(registerRequest.data).toEqual({
@@ -49,15 +56,16 @@ describe('doctor auth api', () => {
       idCardNumber: '110101199001011234',
       title: '主治医师',
       inviteCode: '9999',
+      smsCode: '123456',
       idCardFront: { filePath: 'front.png' },
       idCardBack: { filePath: 'back.png' },
       qualificationCertificate: { filePath: 'qualification.png' }
     })
-    expect(requestMock).toHaveBeenNthCalledWith(3, {
+    expect(requestMock).toHaveBeenNthCalledWith(4, {
       url: '/biz/doctor-auth/logout',
       method: 'post'
     })
-    expect(requestMock).toHaveBeenNthCalledWith(4, {
+    expect(requestMock).toHaveBeenNthCalledWith(5, {
       url: '/biz/doctor-auth/account',
       method: 'delete'
     })

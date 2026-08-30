@@ -23,6 +23,14 @@ export function register(data) {
   })
 }
 
+export function sendRegisterSmsCode(phone) {
+  return request({
+    url: '/biz/doctor-auth/register/sms-code',
+    method: 'post',
+    data: { phone }
+  })
+}
+
 export function uploadDoctorRegistrationAttachment(file) {
   const formData = new FormData()
   formData.append('file', file)
