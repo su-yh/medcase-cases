@@ -22,6 +22,10 @@ export default defineConfig(({ command, mode }) => {
         '@': path.resolve(rootDir, './src')
       }
     },
+    build: {
+      outDir: 'dist',
+      emptyOutDir: true
+    },
     server: {
       host: true,
       proxy: {
