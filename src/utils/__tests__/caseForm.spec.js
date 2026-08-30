@@ -15,12 +15,12 @@ describe('case form helpers', () => {
     }
 
     expect(normalizeCaseFormData({
-      title: '病例标题',
-      remark: '病例备注',
+      caseName: '病例名称',
+      content: '病例内容',
       attachments: [attachment]
     })).toEqual({
-      title: '病例标题',
-      remark: '病例备注',
+      caseName: '病例名称',
+      content: '病例内容',
       attachments: [{
       uid: 'existing-20260827/report.pdf',
         name: 'report.pdf',
@@ -36,14 +36,14 @@ describe('case form helpers', () => {
     const attachment = { filePath: '20260827/report.pdf' }
 
     expect(buildCasePayload(
-      { title: '病例标题', remark: '病例备注' },
+      { caseName: '病例名称', content: '病例内容' },
       [
         { uploading: false, attachment },
         { uploading: true, attachment: null }
       ]
     )).toEqual({
-      title: '病例标题',
-      remark: '病例备注',
+      caseName: '病例名称',
+      content: '病例内容',
       attachments: [attachment]
     })
   })
@@ -52,13 +52,13 @@ describe('case form helpers', () => {
     const { addCaseIdToPayload } = await import('@/utils/caseForm')
 
     expect(addCaseIdToPayload({
-      title: '病例标题',
-      remark: '病例备注',
+      caseName: '病例名称',
+      content: '病例内容',
       attachments: []
     }, 42)).toEqual({
       id: 42,
-      title: '病例标题',
-      remark: '病例备注',
+      caseName: '病例名称',
+      content: '病例内容',
       attachments: []
     })
   })

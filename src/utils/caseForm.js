@@ -2,8 +2,8 @@ export const MAX_CASE_ATTACHMENT_SIZE_MB = 50
 
 export function normalizeCaseFormData(caseItem = {}) {
   return {
-    title: caseItem.title || '',
-    remark: caseItem.remark || '',
+    caseName: caseItem.caseName || '',
+    content: caseItem.content || '',
     attachments: (caseItem.attachments || []).map((attachment, index) => ({
       uid: `existing-${attachment.filePath || index}`,
       name: attachment.originalFilename || attachment.filePath || `附件${index + 1}`,
@@ -16,8 +16,8 @@ export function normalizeCaseFormData(caseItem = {}) {
 
 export function buildCasePayload(form, attachmentFiles) {
   return {
-    title: form.title,
-    remark: form.remark,
+    caseName: form.caseName,
+    content: form.content,
     attachments: attachmentFiles
       .filter(file => file.attachment && !file.uploading)
       .map(file => file.attachment)

@@ -55,8 +55,8 @@ describe('doctor case api', () => {
   it('saves a new case draft through the draft endpoint', async () => {
     const { saveDraftCase } = await import('@/api/doctor/cases')
     const payload = {
-      title: '待完善病例',
-      remark: '稍后补充',
+      caseName: '待完善病例',
+      content: '稍后补充',
       attachments: []
     }
 
@@ -96,8 +96,8 @@ describe('doctor case api', () => {
     const { submitCase } = await import('@/api/doctor/cases')
     const payload = {
       id: 42,
-      title: '病例',
-      remark: '',
+      caseName: '病例',
+      content: '',
       attachments: []
     }
 

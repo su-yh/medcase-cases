@@ -1,21 +1,19 @@
 <template>
   <el-form v-loading="detailLoading" label-position="top" @submit.prevent="handleSubmit">
-    <el-form-item label="标题" required>
+    <el-form-item label="病例名称" required>
       <el-input
-        v-model="form.title"
+        v-model="form.caseName"
         maxlength="100"
         show-word-limit
-        placeholder="请输入病例标题"
+        placeholder="请输入病例名称"
       />
     </el-form-item>
-    <el-form-item label="备注">
+    <el-form-item label="病例内容">
       <el-input
-        v-model="form.remark"
+        v-model="form.content"
         type="textarea"
         :rows="4"
-        maxlength="500"
-        show-word-limit
-        placeholder="请输入备注（可选）"
+        placeholder="请输入病例内容（可选）"
       />
     </el-form-item>
     <el-form-item label="附件">
@@ -107,8 +105,8 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'save-draft', 'cancel'])
 
 const form = reactive({
-  title: '',
-  remark: ''
+  caseName: '',
+  content: ''
 })
 const attachmentFiles = ref([])
 const attachmentInput = ref(null)
@@ -127,8 +125,8 @@ watch(
   () => props.initialData,
   (initialData) => {
     const normalized = normalizeCaseFormData(initialData)
-    form.title = normalized.title
-    form.remark = normalized.remark
+    form.caseName = normalized.caseName
+    form.content = normalized.content
     attachmentFiles.value = normalized.attachments
   },
   { immediate: true }
@@ -196,8 +194,8 @@ function removeAttachment(index) {
 }
 
 function validateForm() {
-  if (!form.title.trim()) {
-    ElMessage.warning('请输入病例标题')
+  if (!form.caseName.trim()) {
+    ElMessage.warning('请输入病例名称')
     return false
   }
   if (hasUploadingAttachments.value || uploadedAttachments.value.length !== attachmentFiles.value.length) {

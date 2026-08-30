@@ -23,8 +23,8 @@
 
     <el-card shadow="never" class="case-search-card">
       <el-form inline @submit.prevent="searchCases">
-        <el-form-item label="标题">
-          <el-input v-model="filters.title" clearable placeholder="请输入病例标题" @keyup.enter="searchCases" />
+        <el-form-item label="病例名称">
+          <el-input v-model="filters.caseName" clearable placeholder="请输入病例名称" @keyup.enter="searchCases" />
         </el-form-item>
         <el-form-item label="提交时间">
           <el-date-picker
@@ -52,7 +52,7 @@
     <el-card shadow="never" class="case-table-card">
       <el-table v-loading="loading" :data="caseList" row-key="id">
         <el-table-column label="序号" width="60" type="index" />
-        <el-table-column label="标题" min-width="180" header-align="center" prop="title"/>
+        <el-table-column label="病例名称" min-width="180" header-align="center" prop="caseName"/>
         <el-table-column label="当前状态" width="190">
           <template #default="{ row }">
             <el-tag :type="getStatusTagType(row.status)" effect="light">
@@ -141,8 +141,8 @@
       </template>
       <template v-if="detail">
         <div class="detail-row">
-          <span>病例标题</span>
-          <strong>{{ detail.title }}</strong>
+          <span>病例名称</span>
+          <strong>{{ detail.caseName }}</strong>
         </div>
         <div class="detail-row">
           <span>病例编号</span>
@@ -158,9 +158,9 @@
           <span>审核失败原因</span>
           <p>{{ detail.reviewReason }}</p>
         </div>
-        <div v-if="detail.remark" class="detail-content">
-          <span>备注</span>
-          <p>{{ detail.remark }}</p>
+        <div v-if="detail.content" class="detail-content">
+          <span>病例内容</span>
+          <p>{{ detail.content }}</p>
         </div>
         <div v-if="detail.attachments.length" class="detail-content">
           <span>附件</span>
@@ -209,7 +209,7 @@ const router = useRouter()
 const loading = ref(false)
 const activeStatus = ref('')
 const filters = ref({
-  title: '',
+  caseName: '',
   createTimeRange: []
 })
 const caseList = ref([])
@@ -248,7 +248,7 @@ async function loadCases() {
     const result = await getCasePage({
       pageNo: pageNo.value,
       pageSize: pageSize.value,
-      titleLike: filters.value.title || undefined,
+      caseNameLike: filters.value.caseName || undefined,
       status: activeStatus.value || undefined,
       createTimeLowerBound: filters.value.createTimeRange?.[0] || undefined,
       createTimeUpperBound: filters.value.createTimeRange?.[1] || undefined
@@ -273,7 +273,7 @@ async function searchCases() {
 
 async function resetSearch() {
   filters.value = {
-    title: '',
+    caseName: '',
     createTimeRange: []
   }
   pageNo.value = 1
@@ -305,7 +305,7 @@ async function removeDraft(caseItem) {
 
   try {
     await ElMessageBox.confirm(
-      `确定删除病例“${caseItem.title}”吗？删除后不可恢复。`,
+      `确定删除病例“${caseItem.caseName}”吗？删除后不可恢复。`,
       '删除草稿',
       {
         type: 'warning',
