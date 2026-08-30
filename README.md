@@ -46,6 +46,6 @@ yarn build:prod
 ## zip压缩
 
 ```bash
-zip -r medcase-doctor-dist.zip dist
-zip -r medcase-admin-dist.zip dist
+zip -r dist/medcase-doctor-dist.zip dist
+zip -r dist/medcase-admin-dist.zip dist
 ```
