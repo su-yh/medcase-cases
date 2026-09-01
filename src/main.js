@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import {
+  ElAlert,
   ElButton,
   ElCard,
   ElDialog,
@@ -32,6 +33,7 @@ app.use(router)
 app.component(ElButton.name, ElButton)
 app.component(ElCard.name, ElCard)
 app.component(ElDialog.name, ElDialog)
+app.component(ElAlert.name, ElAlert)
 app.component(ElDatePicker.name, ElDatePicker)
 app.component(ElEmpty.name, ElEmpty)
 app.component(ElForm.name, ElForm)

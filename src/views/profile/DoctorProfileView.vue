@@ -302,20 +302,7 @@ async function handleDeleteAccount() {
   }
 }
 
-onMounted(async () => {
-  if (!userStore.userInfo) {
-    await loadProfile()
-    return
-  }
-  form.nickName = userStore.userInfo.nickName || ''
-  form.sex = userStore.userInfo.sex || ''
-  form.phone = userStore.userInfo.phone || ''
-  form.idCardNumber = userStore.userInfo.idCardNumber || ''
-  form.title = userStore.userInfo.title || ''
-  form.idCardFront = userStore.userInfo.idCardFront || null
-  form.idCardBack = userStore.userInfo.idCardBack || null
-  form.qualificationCertificate = userStore.userInfo.qualificationCertificate || null
-})
+onMounted(loadProfile)
 </script>
 
 <style lang="scss" scoped>

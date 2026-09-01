@@ -33,4 +33,8 @@ describe('doctor profile fields', () => {
     expect(profileViewSource).toContain('sex: form.sex')
     expect(profileViewSource).toContain('reviewReason')
   })
+
+  it('refreshes the profile when the profile page opens', () => {
+    expect(profileViewSource).toContain('onMounted(loadProfile)')
+  })
 })
