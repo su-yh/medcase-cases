@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { USER_TYPE } from '@/constants/user'
 
 const requestMock = vi.fn()
 
@@ -12,15 +13,16 @@ describe('doctor auth api', () => {
     requestMock.mockResolvedValue({})
   })
 
-  it('uses the biz doctor auth routes', async () => {
+  it('uses the biz case auth routes', async () => {
     const { login, register, sendRegisterSmsCode, logout, deleteAccount } = await import('@/api/doctor/auth')
 
-    await login({ username: 'doctor01' })
+    await login({ username: 'doctor01', userType: USER_TYPE.DOCTOR })
     await sendRegisterSmsCode('13800000000')
     await register({
       username: 'doctor01',
       password: 'secret123',
       phone: '13800000000',
+      userType: USER_TYPE.DOCTOR,
       nickName: '张医生',
       sex: '1',
       idCardNumber: '110101199001011234',
@@ -35,22 +37,23 @@ describe('doctor auth api', () => {
     await deleteAccount()
 
     expect(requestMock).toHaveBeenNthCalledWith(1, {
-      url: '/biz/doctor-auth/login',
+      url: '/biz/case-auth/login',
       method: 'post',
-      data: { username: 'doctor01' }
+      data: { username: 'doctor01', userType: USER_TYPE.DOCTOR }
     })
     expect(requestMock).toHaveBeenNthCalledWith(2, {
-      url: '/biz/doctor-auth/register/sms-code',
+      url: '/biz/case-auth/register/sms-code',
       method: 'post',
       data: { phone: '13800000000' }
     })
     const registerRequest = requestMock.mock.calls[2][0]
-    expect(registerRequest.url).toBe('/biz/doctor-auth/register')
+    expect(registerRequest.url).toBe('/biz/case-auth/register')
     expect(registerRequest.method).toBe('post')
     expect(registerRequest.data).toEqual({
       username: 'doctor01',
       password: 'secret123',
       phone: '13800000000',
+      userType: USER_TYPE.DOCTOR,
       nickName: '张医生',
       sex: '1',
       idCardNumber: '110101199001011234',
@@ -62,27 +65,29 @@ describe('doctor auth api', () => {
       qualificationCertificate: { filePath: 'qualification.png' }
     })
     expect(requestMock).toHaveBeenNthCalledWith(4, {
-      url: '/biz/doctor-auth/logout',
+      url: '/biz/case-auth/logout',
       method: 'post'
     })
     expect(requestMock).toHaveBeenNthCalledWith(5, {
-      url: '/biz/doctor-auth/account',
+      url: '/biz/case-auth/account',
       method: 'delete'
     })
   })
 
   it('uploads doctor registration attachments through the anonymous route', async () => {
-    requestMock.mockResolvedValue({ filePath: 'doctor-register/front.png' })
-    const { uploadDoctorRegistrationAttachment } = await import('@/api/doctor/auth')
+    requestMock.mockResolvedValue({ filePath: 'case-register/front.png' })
+    const { uploadCaseRegistrationAttachment } = await import('@/api/doctor/auth')
 
-    await uploadDoctorRegistrationAttachment(
-      new Blob(['front'], { type: 'image/png' })
+    await uploadCaseRegistrationAttachment(
+      new Blob(['front'], { type: 'image/png' }),
+      USER_TYPE.DOCTOR
     )
 
     expect(requestMock).toHaveBeenCalledTimes(1)
     const requestConfig = requestMock.mock.calls[0][0]
-    expect(requestConfig.url).toBe('/file/upload/doctor-register')
+    expect(requestConfig.url).toBe('/file/upload/case-register')
     expect(requestConfig.method).toBe('post')
+    expect(requestConfig.params).toEqual({ userType: USER_TYPE.DOCTOR })
     expect(requestConfig.data).toBeInstanceOf(FormData)
     expect(requestConfig.data.get('file')).toBeInstanceOf(Blob)
   })

@@ -1,8 +1,8 @@
 <template>
   <div class="auth-page">
     <el-card class="auth-card" shadow="always">
-      <h1>医生端注册</h1>
-      <p>创建 MedCase 医生端账号。</p>
+      <h1>病例端注册</h1>
+      <p>创建 MedCase 病例端账号。</p>
       <el-form
         ref="formRef"
         class="register-form-grid"
@@ -41,6 +41,12 @@
             </el-button>
           </div>
         </el-form-item>
+        <el-form-item label="用户类型" prop="userType" required>
+          <el-select v-model="form.userType" style="width: 100%" @change="handleUserTypeChange">
+            <el-option label="医生" :value="USER_TYPE.DOCTOR" />
+            <el-option label="患者" :value="USER_TYPE.PATIENT" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="姓名" prop="nickName" required>
           <el-input v-model="form.nickName" maxlength="30" placeholder="请输入姓名" />
         </el-form-item>
@@ -54,7 +60,7 @@
         <el-form-item label="身份证号码" prop="idCardNumber" required>
           <el-input v-model="form.idCardNumber" maxlength="30" placeholder="请输入身份证号码" />
         </el-form-item>
-        <el-form-item label="职称" prop="title" required>
+        <el-form-item v-if="isDoctor" label="职称" prop="title" required>
           <el-input v-model="form.title" maxlength="50" placeholder="请输入职称" />
         </el-form-item>
         <el-form-item label="邀请码" prop="inviteCode" required>
@@ -86,7 +92,7 @@
           </el-upload>
           <span class="upload-name">{{ attachmentName(form.idCardBack) }}</span>
         </el-form-item>
-        <el-form-item label="医师职业资格证图片" prop="qualificationCertificate" required>
+        <el-form-item v-if="isDoctor" label="医师职业资格证图片" prop="qualificationCertificate" required>
           <el-upload
             :limit="1"
             :show-file-list="false"
@@ -131,13 +137,14 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import { startCountdown } from '@/utils/countdown'
 import { isPasswordConfirmed } from '@/utils/register'
-import { sendRegisterSmsCode, uploadDoctorRegistrationAttachment } from '@/api/doctor/auth'
+import { sendRegisterSmsCode, uploadCaseRegistrationAttachment } from '@/api/doctor/auth'
+import { USER_TYPE } from '@/constants/user'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -151,6 +158,7 @@ const remainingSeconds = ref(3)
 let stopCountdown
 let stopSmsCountdown
 let navigating = false
+const isDoctor = computed(() => form.userType === USER_TYPE.DOCTOR)
 
 const form = reactive({
   username: '',
@@ -158,6 +166,7 @@ const form = reactive({
   confirmPassword: '',
   phone: '',
   smsCode: '999999',
+  userType: USER_TYPE.DOCTOR,
   nickName: '',
   sex: '',
   idCardNumber: '',
@@ -172,7 +181,7 @@ const requiredRule = (label) => [
   { required: true, message: `请输入${label}`, trigger: 'blur' }
 ]
 
-const rules = {
+const rules = computed(() => ({
   username: requiredRule('用户名'),
   password: requiredRule('密码'),
   confirmPassword: [
@@ -196,17 +205,17 @@ const rules = {
     { required: true, message: '请输入短信验证码', trigger: 'blur' },
     { pattern: /^\d{6}$/, message: '短信验证码为6位数字', trigger: 'blur' }
   ],
+  userType: requiredRule('用户类型'),
   nickName: requiredRule('姓名'),
   sex: requiredRule('性别'),
   idCardNumber: requiredRule('身份证号码'),
-  title: requiredRule('职称'),
   inviteCode: requiredRule('邀请码'),
   idCardFront: [{ required: true, message: '请上传身份证正面图片', trigger: 'change' }],
   idCardBack: [{ required: true, message: '请上传身份证反面图片', trigger: 'change' }],
-  qualificationCertificate: [
-    { required: true, message: '请上传医师职业资格证图片', trigger: 'change' }
-  ]
-}
+  qualificationCertificate: isDoctor.value
+    ? [{ required: true, message: '请上传医师职业资格证图片', trigger: 'change' }]
+    : []
+}))
 
 async function handleSendSmsCode() {
   if (smsCodeSending.value || smsCountdown.value > 0) {
@@ -245,7 +254,7 @@ async function handleFileChange(field, uploadFile) {
 
   uploadingField.value = field
   try {
-    form[field] = await uploadDoctorRegistrationAttachment(file)
+    form[field] = await uploadCaseRegistrationAttachment(file, form.userType)
     await formRef.value?.validateField(field)
   } catch (error) {
     form[field] = null
@@ -257,6 +266,14 @@ async function handleFileChange(field, uploadFile) {
 
 function attachmentName(attachment) {
   return attachment?.originalFilename || attachment?.filePath || '未上传'
+}
+
+function handleUserTypeChange(userType) {
+  if (userType === USER_TYPE.PATIENT) {
+    form.title = ''
+    form.qualificationCertificate = null
+  }
+  formRef.value?.clearValidate(['title', 'qualificationCertificate'])
 }
 
 async function handleRegister() {
@@ -277,6 +294,7 @@ async function handleRegister() {
       password: form.password,
       phone: form.phone,
       smsCode: form.smsCode,
+      userType: form.userType,
       nickName: form.nickName,
       sex: form.sex,
       idCardNumber: form.idCardNumber,

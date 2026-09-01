@@ -8,6 +8,7 @@ import {
   logout as logoutApi
 } from '@/api/doctor/auth'
 import { getMyProfile } from '@/api/doctor/profile'
+import { USER_STATUS } from '@/constants/user'
 
 vi.mock('@/api/doctor/auth', () => ({
   login: vi.fn(),
@@ -76,7 +77,7 @@ describe('doctor user store', () => {
       id: 12,
       nickName: '张医生',
       phone: '13800000000',
-      status: '5'
+      status: USER_STATUS.REGISTER
     })
     const store = useUserStore()
 
@@ -92,7 +93,7 @@ describe('doctor user store', () => {
       id: 12,
       nickName: '张医生',
       phone: '13800000000',
-      status: '5'
+      status: USER_STATUS.REGISTER
     })
   })
 })

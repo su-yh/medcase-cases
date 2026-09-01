@@ -1,9 +1,15 @@
 <template>
   <div class="auth-page">
     <el-card class="auth-card" shadow="always">
-      <h1>医生端登录</h1>
-      <p>欢迎来到 MedCase 医生端</p>
+      <h1>病例端登录</h1>
+      <p>欢迎来到 MedCase 病例端</p>
       <el-form label-position="top" @submit.prevent="handleLogin">
+        <el-form-item label="用户类型">
+          <el-select v-model="form.userType" style="width: 100%">
+            <el-option label="医生" :value="USER_TYPE.DOCTOR" />
+            <el-option label="患者" :value="USER_TYPE.PATIENT" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="用户名">
           <el-input v-model="form.username" placeholder="请输入用户名" />
         </el-form-item>
@@ -38,6 +44,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getCaptcha } from '@/api/doctor/auth'
 import useUserStore from '@/stores/user'
+import { USER_TYPE } from '@/constants/user'
 
 const route = useRoute()
 const router = useRouter()
@@ -49,7 +56,8 @@ const form = reactive({
   username: '',
   password: '',
   code: '',
-  uuid: ''
+  uuid: '',
+  userType: USER_TYPE.DOCTOR
 })
 
 async function loadCaptcha() {

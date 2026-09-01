@@ -23,7 +23,7 @@
       <template v-else>
         <header class="profile-heading">
           <span v-if="reviewFailed" class="profile-state-label">审核未通过</span>
-          <h1>{{ reviewFailed ? '重新提交资料' : '完善医生资料' }}</h1>
+          <h1>{{ reviewFailed ? '重新提交资料' : '完善资料' }}</h1>
           <p>{{ reviewFailed ? '请更新资料后重新提交审核。' : '请填写基本资料后提交管理员审核。' }}</p>
           <el-alert
             v-if="reviewFailed && userStore.userInfo?.reviewReason"
@@ -53,7 +53,7 @@
           <el-form-item label="身份证号码" required>
             <el-input v-model="form.idCardNumber" maxlength="30" placeholder="请输入身份证号码" />
           </el-form-item>
-          <el-form-item label="职称" required>
+          <el-form-item v-if="isDoctor" label="职称" required>
             <el-input v-model="form.title" maxlength="50" placeholder="请输入职称" />
           </el-form-item>
           <el-form-item label="身份证正面图片">
@@ -100,7 +100,7 @@
               </el-button>
             </div>
           </el-form-item>
-          <el-form-item label="医师职业资格证图片">
+          <el-form-item v-if="isDoctor" label="医师职业资格证图片">
             <div class="profile-attachment">
               <span>{{ attachmentName(form.qualificationCertificate) }}</span>
               <el-upload
@@ -161,6 +161,7 @@ import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import AttachmentPreviewDialog from '@/components/attachments/AttachmentPreviewDialog.vue'
 import { uploadProfileAttachment } from '@/api/doctor/profile'
+import { normalizeEnumCode, USER_STATUS, USER_TYPE } from '@/constants/user'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -182,9 +183,15 @@ const form = reactive({
 })
 
 const profileStatus = computed(() => userStore.userInfo?.status)
-const pendingReview = computed(() => profileStatus.value === '3')
-const reviewFailed = computed(() => profileStatus.value === '4')
-const canDeleteAccount = computed(() => ['3', '4', '5'].includes(profileStatus.value))
+const normalizedProfileStatus = computed(() => normalizeEnumCode(profileStatus.value))
+const isDoctor = computed(() => normalizeEnumCode(userStore.userInfo?.userType) === USER_TYPE.DOCTOR)
+const pendingReview = computed(() => normalizedProfileStatus.value === USER_STATUS.PENDING_REVIEW)
+const reviewFailed = computed(() => normalizedProfileStatus.value === USER_STATUS.REVIEW_FAILED)
+const canDeleteAccount = computed(() => [
+  USER_STATUS.PENDING_REVIEW,
+  USER_STATUS.REVIEW_FAILED,
+  USER_STATUS.REGISTER
+].includes(normalizedProfileStatus.value))
 
 async function loadProfile() {
   loadingProfile.value = true
@@ -208,8 +215,12 @@ async function handleSubmit() {
     ElMessage.warning('请等待证件图片上传完成')
     return
   }
-  if (!form.idCardFront || !form.idCardBack || !form.qualificationCertificate) {
-    ElMessage.warning('请先上传身份证和资格证图片')
+  if (!form.idCardFront || !form.idCardBack) {
+    ElMessage.warning('请先上传身份证图片')
+    return
+  }
+  if (isDoctor.value && !form.qualificationCertificate) {
+    ElMessage.warning('请先上传资格证图片')
     return
   }
   if (!form.sex) {
@@ -223,10 +234,10 @@ async function handleSubmit() {
       sex: form.sex,
       phone: form.phone,
       idCardNumber: form.idCardNumber,
-      title: form.title,
+      title: isDoctor.value ? form.title : '',
       idCardFront: form.idCardFront,
       idCardBack: form.idCardBack,
-      qualificationCertificate: form.qualificationCertificate
+      qualificationCertificate: isDoctor.value ? form.qualificationCertificate : null
     })
     ElMessage.success('资料已提交，等待管理员审核')
   } finally {

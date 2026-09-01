@@ -2,14 +2,14 @@ import request from '@/utils/request'
 
 export function getMyProfile() {
   return request({
-    url: '/biz/doctor-profile',
+    url: '/biz/case-profile',
     method: 'get'
   })
 }
 
 export function submitProfile(data) {
   return request({
-    url: '/biz/doctor-profile',
+    url: '/biz/case-profile',
     method: 'post',
     data
   })
@@ -22,7 +22,7 @@ export function uploadProfileAttachment(file) {
   return request({
     url: '/file/upload',
     method: 'post',
-    params: { business: 'doctor-register' },
+    params: { business: 'case-register' },
     data: formData
   })
 }

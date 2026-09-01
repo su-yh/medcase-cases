@@ -3,10 +3,10 @@
     <aside class="doctor-sidebar">
       <div class="doctor-brand">
         <span class="doctor-brand-mark">M</span>
-        <span>MedCase 医生端</span>
+        <span>MedCase {{ userType }}端</span>
       </div>
 
-      <nav class="doctor-nav" aria-label="医生端导航">
+      <nav class="doctor-nav" :aria-label="`${userType}端导航`">
         <router-link to="/cases">病例中心</router-link>
         <router-link to="/cases/submit">提交病例</router-link>
       </nav>
@@ -17,9 +17,9 @@
       </nav>
 
       <div class="doctor-account">
-        <span class="doctor-avatar">医</span>
+        <span class="doctor-avatar">{{ userType.charAt(0) }}</span>
         <span>
-          <strong>医生账号</strong>
+          <strong>{{ userType }}账号</strong>
           <small>前端 v{{ appVersion }}</small>
           <small>后端 v{{ backendVersion }}</small>
         </span>
@@ -29,7 +29,7 @@
     <main class="doctor-main">
       <header class="doctor-topbar">
         <strong>病例工作台</strong>
-        <span>审核由管理端完成，医生端只查看结果</span>
+        <span>审核由管理端完成，{{ userType }}端只查看结果</span>
       </header>
       <section class="doctor-content">
         <router-view />
@@ -39,14 +39,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import { APP_VERSION } from '@/utils/version'
 import { getSystemVersion } from '@/api/system/version'
+import { userTypeLabel } from '@/utils/userType'
 
 const router = useRouter()
 const userStore = useUserStore()
+const userType = computed(() => userTypeLabel(userStore.userInfo?.userType))
 const appVersion = APP_VERSION
 const backendVersion = ref('unknown')
 

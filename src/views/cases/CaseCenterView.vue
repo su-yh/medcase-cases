@@ -254,7 +254,7 @@ async function loadCases() {
       createTimeUpperBound: filters.value.createTimeRange?.[1] || undefined
     })
     caseList.value = result?.list || []
-    total.value = Number(result?.total || 0)
+    total.value = result?.total || 0
   } finally {
     loading.value = false
   }

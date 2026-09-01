@@ -17,7 +17,7 @@ describe('doctor profile api', () => {
     getMyProfile()
 
     expect(requestMock).toHaveBeenCalledWith({
-      url: '/biz/doctor-profile',
+      url: '/biz/case-profile',
       method: 'get'
     })
   })
@@ -38,7 +38,7 @@ describe('doctor profile api', () => {
     submitProfile(payload)
 
     expect(requestMock).toHaveBeenCalledWith({
-      url: '/biz/doctor-profile',
+      url: '/biz/case-profile',
       method: 'post',
       data: payload
     })
@@ -53,7 +53,7 @@ describe('doctor profile api', () => {
     const requestConfig = requestMock.mock.calls[0][0]
     expect(requestConfig.url).toBe('/file/upload')
     expect(requestConfig.method).toBe('post')
-    expect(requestConfig.params).toEqual({ business: 'doctor-register' })
+    expect(requestConfig.params).toEqual({ business: 'case-register' })
     expect(requestConfig.data).toBeInstanceOf(FormData)
     expect(requestConfig.data.get('file')).toBeInstanceOf(Blob)
   })

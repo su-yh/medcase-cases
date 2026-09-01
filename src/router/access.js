@@ -1,18 +1,14 @@
-const DoctorUserStatus = {
-  OK: '0',
-  PENDING_REVIEW: '3',
-  REVIEW_FAILED: '4',
-  REGISTER: '5'
-}
+import { normalizeEnumCode, USER_STATUS } from '@/constants/user'
 
 export function canAccessDoctorBusiness(status) {
-  return status === DoctorUserStatus.OK
+  return normalizeEnumCode(status) === USER_STATUS.OK
 }
 
 export function canVisitDoctorProfile(status) {
-  return status === DoctorUserStatus.REGISTER
-    || status === DoctorUserStatus.REVIEW_FAILED
-    || status === DoctorUserStatus.PENDING_REVIEW
+  const normalizedStatus = normalizeEnumCode(status)
+  return normalizedStatus === USER_STATUS.REGISTER
+    || normalizedStatus === USER_STATUS.REVIEW_FAILED
+    || normalizedStatus === USER_STATUS.PENDING_REVIEW
 }
 
 export function getDoctorLandingPath(status, fallbackPath = '/home') {
