@@ -6,23 +6,23 @@ import {
   deleteAccount as deleteAccountApi,
   login as loginApi,
   logout as logoutApi
-} from '@/api/doctor/auth'
-import { getMyProfile } from '@/api/doctor/profile'
+} from '@/api/user/auth'
+import { getMyProfile } from '@/api/user/profile'
 import { USER_STATUS } from '@/constants/user'
 
-vi.mock('@/api/doctor/auth', () => ({
+vi.mock('@/api/user/auth', () => ({
   login: vi.fn(),
   register: vi.fn(),
   logout: vi.fn(),
   deleteAccount: vi.fn()
 }))
 
-vi.mock('@/api/doctor/profile', () => ({
+vi.mock('@/api/user/profile', () => ({
   getMyProfile: vi.fn(),
   submitProfile: vi.fn()
 }))
 
-describe('doctor user store', () => {
+describe('user store', () => {
   afterEach(() => {
     clearToken()
     vi.clearAllMocks()
@@ -70,7 +70,7 @@ describe('doctor user store', () => {
     expect(getToken()).toBe('')
   })
 
-  it('loads and stores the doctor profile after login', async () => {
+  it('loads and stores the user profile after login', async () => {
     setActivePinia(createPinia())
     loginApi.mockResolvedValue('doctor-token')
     getMyProfile.mockResolvedValue({

@@ -81,7 +81,7 @@ import {
   MAX_CASE_ATTACHMENT_SIZE_MB,
   normalizeCaseFormData
 } from '@/utils/caseForm'
-import { uploadCaseAttachments } from '@/api/doctor/cases'
+import { uploadCaseAttachments } from '@/api/case/cases'
 
 const props = defineProps({
   initialData: {

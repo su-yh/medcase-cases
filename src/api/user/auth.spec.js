@@ -7,14 +7,14 @@ vi.mock('@/utils/request', () => ({
   default: requestMock
 }))
 
-describe('doctor auth api', () => {
+describe('user auth api', () => {
   beforeEach(() => {
     requestMock.mockReset()
     requestMock.mockResolvedValue({})
   })
 
   it('uses the biz case auth routes', async () => {
-    const { login, register, sendRegisterSmsCode, logout, deleteAccount } = await import('@/api/doctor/auth')
+    const { login, register, sendRegisterSmsCode, logout, deleteAccount } = await import('@/api/user/auth')
 
     await login({ username: 'doctor01', userType: USER_TYPE.DOCTOR })
     await sendRegisterSmsCode('13800000000')
@@ -37,17 +37,17 @@ describe('doctor auth api', () => {
     await deleteAccount()
 
     expect(requestMock).toHaveBeenNthCalledWith(1, {
-      url: '/biz/case-auth/login',
+      url: '/biz/user-auth/login',
       method: 'post',
       data: { username: 'doctor01', userType: USER_TYPE.DOCTOR }
     })
     expect(requestMock).toHaveBeenNthCalledWith(2, {
-      url: '/biz/case-auth/register/sms-code',
+      url: '/biz/user-auth/register/sms-code',
       method: 'post',
       data: { phone: '13800000000' }
     })
     const registerRequest = requestMock.mock.calls[2][0]
-    expect(registerRequest.url).toBe('/biz/case-auth/register')
+    expect(registerRequest.url).toBe('/biz/user-auth/register')
     expect(registerRequest.method).toBe('post')
     expect(registerRequest.data).toEqual({
       username: 'doctor01',
@@ -65,18 +65,18 @@ describe('doctor auth api', () => {
       qualificationCertificate: { filePath: 'qualification.png' }
     })
     expect(requestMock).toHaveBeenNthCalledWith(4, {
-      url: '/biz/case-auth/logout',
+      url: '/biz/user-auth/logout',
       method: 'post'
     })
     expect(requestMock).toHaveBeenNthCalledWith(5, {
-      url: '/biz/case-auth/account',
+      url: '/biz/user-auth/account',
       method: 'delete'
     })
   })
 
-  it('uploads doctor registration attachments through the anonymous route', async () => {
+  it('uploads user registration attachments through the anonymous route', async () => {
     requestMock.mockResolvedValue({ filePath: 'case-register/front.png' })
-    const { uploadCaseRegistrationAttachment } = await import('@/api/doctor/auth')
+    const { uploadCaseRegistrationAttachment } = await import('@/api/user/auth')
 
     await uploadCaseRegistrationAttachment(
       new Blob(['front'], { type: 'image/png' }),

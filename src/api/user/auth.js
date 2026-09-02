@@ -9,7 +9,7 @@ export function getCaptcha() {
 
 export function login(data) {
   return request({
-    url: '/biz/case-auth/login',
+    url: '/biz/user-auth/login',
     method: 'post',
     data
   })
@@ -17,7 +17,7 @@ export function login(data) {
 
 export function register(data) {
   return request({
-    url: '/biz/case-auth/register',
+    url: '/biz/user-auth/register',
     method: 'post',
     data
   })
@@ -25,7 +25,7 @@ export function register(data) {
 
 export function sendRegisterSmsCode(phone) {
   return request({
-    url: '/biz/case-auth/register/sms-code',
+    url: '/biz/user-auth/register/sms-code',
     method: 'post',
     data: { phone }
   })
@@ -45,14 +45,14 @@ export function uploadCaseRegistrationAttachment(file, userType) {
 
 export function logout() {
   return request({
-    url: '/biz/case-auth/logout',
+    url: '/biz/user-auth/logout',
     method: 'post'
   })
 }
 
 export function deleteAccount() {
   return request({
-    url: '/biz/case-auth/account',
+    url: '/biz/user-auth/account',
     method: 'delete'
   })
 }

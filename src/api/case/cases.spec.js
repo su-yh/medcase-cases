@@ -6,13 +6,13 @@ vi.mock('@/utils/request', () => ({
   default: requestMock
 }))
 
-describe('doctor case api', () => {
+describe('case api', () => {
   beforeEach(() => {
     requestMock.mockReset()
   })
 
   it('uploads each case attachment through the single-file storage endpoint', async () => {
-    const { uploadCaseAttachments } = await import('@/api/doctor/cases')
+    const { uploadCaseAttachments } = await import('@/api/case/cases')
     const files = [
       new File(['first'], 'first.pdf', { type: 'application/pdf' }),
       new File(['second'], 'second.pdf', { type: 'application/pdf' })
@@ -53,7 +53,7 @@ describe('doctor case api', () => {
   })
 
   it('saves a new case draft through the draft endpoint', async () => {
-    const { saveDraftCase } = await import('@/api/doctor/cases')
+    const { saveDraftCase } = await import('@/api/case/cases')
     const payload = {
       caseName: '待完善病例',
       content: '稍后补充',
@@ -70,7 +70,7 @@ describe('doctor case api', () => {
   })
 
   it('deletes a case through the case resource endpoint', async () => {
-    const { deleteCase } = await import('@/api/doctor/cases')
+    const { deleteCase } = await import('@/api/case/cases')
 
     deleteCase(42)
 
@@ -81,7 +81,7 @@ describe('doctor case api', () => {
   })
 
   it('loads a case detail through the case resource endpoint', async () => {
-    const { getCaseDetail } = await import('@/api/doctor/cases')
+    const { getCaseDetail } = await import('@/api/case/cases')
 
     requestMock.mockResolvedValueOnce({})
     getCaseDetail(42)
@@ -93,7 +93,7 @@ describe('doctor case api', () => {
   })
 
   it('submits an edited draft with its id', async () => {
-    const { submitCase } = await import('@/api/doctor/cases')
+    const { submitCase } = await import('@/api/case/cases')
     const payload = {
       id: 42,
       caseName: '病例',

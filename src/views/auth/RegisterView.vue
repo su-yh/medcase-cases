@@ -143,7 +143,7 @@ import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import { startCountdown } from '@/utils/countdown'
 import { isPasswordConfirmed } from '@/utils/register'
-import { sendRegisterSmsCode, uploadCaseRegistrationAttachment } from '@/api/doctor/auth'
+import { sendRegisterSmsCode, uploadCaseRegistrationAttachment } from '@/api/user/auth'
 import { USER_TYPE } from '@/constants/user'
 
 const router = useRouter()

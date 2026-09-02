@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getToken } from '@/utils/auth'
 import {
-  canAccessDoctorBusiness,
-  canVisitDoctorProfile,
-  getDoctorLandingPath
+  canAccessCaseBusiness,
+  canVisitUserProfile,
+  getUserLandingPath
 } from '@/router/access'
 import useUserStore from '@/stores/user'
 import { buildTitle } from '@/utils/title'
@@ -27,8 +27,8 @@ const routes = [
   },
   {
     path: '/profile',
-    name: 'DoctorProfile',
-    component: () => import('@/views/profile/DoctorProfileView.vue'),
+    name: 'UserProfile',
+    component: () => import('@/views/profile/UserProfileView.vue'),
     meta: {
       title: '资料提交',
       requiresAuth: true
@@ -40,7 +40,7 @@ const routes = [
   },
   {
     path: '/',
-    component: () => import('@/layouts/DoctorLayout.vue'),
+    component: () => import('@/layouts/CaseLayout.vue'),
     meta: {
       requiresAuth: true
     },
@@ -107,17 +107,17 @@ router.beforeEach(async (to) => {
 
   const status = userStore.userInfo?.status
   if (to.path === '/login' || to.path === '/register') {
-    return getDoctorLandingPath(status)
+    return getUserLandingPath(status)
   }
 
   if (to.path === '/profile') {
-    if (canVisitDoctorProfile(status)) {
+    if (canVisitUserProfile(status)) {
       return true
     }
-    return canAccessDoctorBusiness(status) ? '/home' : '/login'
+    return canAccessCaseBusiness(status) ? '/home' : '/login'
   }
 
-  if (to.meta?.requiresAuth && !canAccessDoctorBusiness(status)) {
+  if (to.meta?.requiresAuth && !canAccessCaseBusiness(status)) {
     return '/profile'
   }
 

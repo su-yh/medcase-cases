@@ -21,7 +21,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getCaseDetail, saveDraftCase, submitCase } from '@/api/doctor/cases'
+import { getCaseDetail, saveDraftCase, submitCase } from '@/api/case/cases'
 import CaseForm from '@/components/cases/CaseForm.vue'
 import { addCaseIdToPayload } from '@/utils/caseForm'
 

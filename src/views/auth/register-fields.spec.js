@@ -8,11 +8,11 @@ const registerViewSource = readFileSync(
 )
 
 const profileViewSource = readFileSync(
-  fileURLToPath(new URL('../profile/DoctorProfileView.vue', import.meta.url)),
+  fileURLToPath(new URL('../profile/UserProfileView.vue', import.meta.url)),
   'utf8'
 )
 
-describe('doctor profile fields', () => {
+describe('user registration fields', () => {
   it('renders and submits a selectable sex field', () => {
     expect(registerViewSource).toContain('prop="sex"')
     expect(registerViewSource).toContain('v-model="form.sex"')

@@ -23,7 +23,7 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { saveDraftCase, submitCase } from '@/api/doctor/cases'
+import { saveDraftCase, submitCase } from '@/api/case/cases'
 import CaseForm from '@/components/cases/CaseForm.vue'
 
 const router = useRouter()

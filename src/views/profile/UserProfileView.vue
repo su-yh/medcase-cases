@@ -160,7 +160,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import AttachmentPreviewDialog from '@/components/attachments/AttachmentPreviewDialog.vue'
-import { uploadProfileAttachment } from '@/api/doctor/profile'
+import { uploadProfileAttachment } from '@/api/user/profile'
 import { normalizeEnumCode, USER_STATUS, USER_TYPE } from '@/constants/user'
 
 const router = useRouter()

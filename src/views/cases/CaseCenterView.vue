@@ -196,14 +196,14 @@
 import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { deleteCase, getCasePage } from '@/api/doctor/cases'
+import { deleteCase, getCasePage } from '@/api/case/cases'
 import CaseEditDialog from '@/components/cases/CaseEditDialog.vue'
 import AttachmentPreviewDialog from '@/components/attachments/AttachmentPreviewDialog.vue'
 import {
   CASE_STATUS_TABS,
   getCaseStatusLabel,
   getCaseStatusClass
-} from '@/utils/doctorCase'
+} from '@/utils/case'
 
 const router = useRouter()
 const loading = ref(false)

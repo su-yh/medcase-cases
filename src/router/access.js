@@ -1,21 +1,21 @@
 import { normalizeEnumCode, USER_STATUS } from '@/constants/user'
 
-export function canAccessDoctorBusiness(status) {
+export function canAccessCaseBusiness(status) {
   return normalizeEnumCode(status) === USER_STATUS.OK
 }
 
-export function canVisitDoctorProfile(status) {
+export function canVisitUserProfile(status) {
   const normalizedStatus = normalizeEnumCode(status)
   return normalizedStatus === USER_STATUS.REGISTER
     || normalizedStatus === USER_STATUS.REVIEW_FAILED
     || normalizedStatus === USER_STATUS.PENDING_REVIEW
 }
 
-export function getDoctorLandingPath(status, fallbackPath = '/home') {
-  if (canAccessDoctorBusiness(status)) {
+export function getUserLandingPath(status, fallbackPath = '/home') {
+  if (canAccessCaseBusiness(status)) {
     return fallbackPath
   }
-  if (canVisitDoctorProfile(status)) {
+  if (canVisitUserProfile(status)) {
     return '/profile'
   }
   return '/login'

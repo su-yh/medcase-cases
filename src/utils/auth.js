@@ -1,4 +1,4 @@
-const TOKEN_KEY = 'doctor_token'
+const TOKEN_KEY = 'user_token'
 let memoryToken = ''
 
 function hasLocalStorage() {

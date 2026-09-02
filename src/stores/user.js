@@ -4,11 +4,11 @@ import {
   login as loginApi,
   logout as logoutApi,
   register as registerApi
-} from '@/api/doctor/auth'
-import { getMyProfile, submitProfile as submitProfileApi } from '@/api/doctor/profile'
+} from '@/api/user/auth'
+import { getMyProfile, submitProfile as submitProfileApi } from '@/api/user/profile'
 import { clearToken, getToken, setToken } from '@/utils/auth'
 
-const useUserStore = defineStore('doctor-user', {
+const useUserStore = defineStore('user', {
   state: () => ({
     token: getToken(),
     userInfo: null

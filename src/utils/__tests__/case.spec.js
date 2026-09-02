@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-describe('doctor case helpers', () => {
-  it('provides the doctor case status tabs', async () => {
-    const { CASE_STATUS_TABS } = await import('@/utils/doctorCase')
+describe('case helpers', () => {
+  it('provides the case status tabs', async () => {
+    const { CASE_STATUS_TABS } = await import('@/utils/case')
 
     expect(CASE_STATUS_TABS.map((item) => item.key)).toEqual([
       '',
@@ -15,7 +15,7 @@ describe('doctor case helpers', () => {
   })
 
   it('resolves status labels', async () => {
-    const { getCaseStatusLabel } = await import('@/utils/doctorCase')
+    const { getCaseStatusLabel } = await import('@/utils/case')
 
     expect(getCaseStatusLabel('draft')).toBe('草稿')
     expect(getCaseStatusLabel('review_failed')).toBe('审核失败')

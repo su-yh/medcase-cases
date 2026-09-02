@@ -42,7 +42,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getCaptcha } from '@/api/doctor/auth'
+import { getCaptcha } from '@/api/user/auth'
 import useUserStore from '@/stores/user'
 import { USER_TYPE } from '@/constants/user'
 
