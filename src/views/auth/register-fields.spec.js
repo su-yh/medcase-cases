@@ -28,6 +28,14 @@ describe('user registration fields', () => {
     expect(registerViewSource).toContain('class="register-form-grid"')
   })
 
+  it('uses a supplier selector instead of the legacy invite code', () => {
+    expect(registerViewSource).toContain('prop="supplierId"')
+    expect(registerViewSource).toContain('v-model="form.supplierId"')
+    expect(registerViewSource).toContain('getSupplierOptions')
+    expect(registerViewSource).toContain('supplierId: form.supplierId')
+    expect(registerViewSource).not.toContain('inviteCode')
+  })
+
   it('submits sex and shows the review rejection reason', () => {
     expect(profileViewSource).toContain('v-model="form.sex"')
     expect(profileViewSource).toContain('sex: form.sex')

@@ -31,6 +31,13 @@ export function sendRegisterSmsCode(phone) {
   })
 }
 
+export function getSupplierOptions() {
+  return request({
+    url: '/biz/supplier/options',
+    method: 'get'
+  })
+}
+
 export function uploadCaseRegistrationAttachment(file, userType) {
   const formData = new FormData()
   formData.append('file', file)

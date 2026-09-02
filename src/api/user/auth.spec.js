@@ -14,10 +14,18 @@ describe('user auth api', () => {
   })
 
   it('uses the biz case auth routes', async () => {
-    const { login, register, sendRegisterSmsCode, logout, deleteAccount } = await import('@/api/user/auth')
+    const {
+      login,
+      register,
+      sendRegisterSmsCode,
+      logout,
+      deleteAccount,
+      getSupplierOptions
+    } = await import('@/api/user/auth')
 
     await login({ username: 'doctor01', userType: USER_TYPE.DOCTOR })
     await sendRegisterSmsCode('13800000000')
+    await getSupplierOptions()
     await register({
       username: 'doctor01',
       password: 'secret123',
@@ -27,7 +35,7 @@ describe('user auth api', () => {
       sex: '1',
       idCardNumber: '110101199001011234',
       title: '主治医师',
-      inviteCode: '9999',
+      supplierId: 1,
       smsCode: '123456',
       idCardFront: { filePath: 'front.png' },
       idCardBack: { filePath: 'back.png' },
@@ -46,7 +54,11 @@ describe('user auth api', () => {
       method: 'post',
       data: { phone: '13800000000' }
     })
-    const registerRequest = requestMock.mock.calls[2][0]
+    expect(requestMock).toHaveBeenNthCalledWith(3, {
+      url: '/biz/supplier/options',
+      method: 'get'
+    })
+    const registerRequest = requestMock.mock.calls[3][0]
     expect(registerRequest.url).toBe('/biz/user-auth/register')
     expect(registerRequest.method).toBe('post')
     expect(registerRequest.data).toEqual({
@@ -58,17 +70,17 @@ describe('user auth api', () => {
       sex: '1',
       idCardNumber: '110101199001011234',
       title: '主治医师',
-      inviteCode: '9999',
+      supplierId: 1,
       smsCode: '123456',
       idCardFront: { filePath: 'front.png' },
       idCardBack: { filePath: 'back.png' },
       qualificationCertificate: { filePath: 'qualification.png' }
     })
-    expect(requestMock).toHaveBeenNthCalledWith(4, {
+    expect(requestMock).toHaveBeenNthCalledWith(5, {
       url: '/biz/user-auth/logout',
       method: 'post'
     })
-    expect(requestMock).toHaveBeenNthCalledWith(5, {
+    expect(requestMock).toHaveBeenNthCalledWith(6, {
       url: '/biz/user-auth/account',
       method: 'delete'
     })

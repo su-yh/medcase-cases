@@ -63,8 +63,21 @@
         <el-form-item v-if="isDoctor" label="职称" prop="title" required>
           <el-input v-model="form.title" maxlength="50" placeholder="请输入职称" />
         </el-form-item>
-        <el-form-item label="邀请码" prop="inviteCode" required>
-          <el-input v-model="form.inviteCode" readonly />
+        <el-form-item label="邀请人" prop="supplierId" required>
+          <el-select
+            v-model="form.supplierId"
+            filterable
+            clearable
+            placeholder="请选择邀请人"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="supplier in supplierOptions"
+              :key="supplier.id"
+              :label="supplier.nickName"
+              :value="supplier.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="身份证正面图片" prop="idCardFront" required>
           <el-upload
@@ -137,13 +150,17 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import { startCountdown } from '@/utils/countdown'
 import { isPasswordConfirmed } from '@/utils/register'
-import { sendRegisterSmsCode, uploadCaseRegistrationAttachment } from '@/api/user/auth'
+import {
+  getSupplierOptions,
+  sendRegisterSmsCode,
+  uploadCaseRegistrationAttachment
+} from '@/api/user/auth'
 import { USER_TYPE } from '@/constants/user'
 
 const router = useRouter()
@@ -155,6 +172,7 @@ const smsCodeSending = ref(false)
 const smsCountdown = ref(0)
 const registerSuccessVisible = ref(false)
 const remainingSeconds = ref(3)
+const supplierOptions = ref([])
 let stopCountdown
 let stopSmsCountdown
 let navigating = false
@@ -171,7 +189,7 @@ const form = reactive({
   sex: '',
   idCardNumber: '',
   title: '',
-  inviteCode: '9999',
+  supplierId: null,
   idCardFront: null,
   idCardBack: null,
   qualificationCertificate: null
@@ -209,7 +227,7 @@ const rules = computed(() => ({
   nickName: requiredRule('姓名'),
   sex: requiredRule('性别'),
   idCardNumber: requiredRule('身份证号码'),
-  inviteCode: requiredRule('邀请码'),
+  supplierId: [{ required: true, message: '请选择邀请人', trigger: 'change' }],
   idCardFront: [{ required: true, message: '请上传身份证正面图片', trigger: 'change' }],
   idCardBack: [{ required: true, message: '请上传身份证反面图片', trigger: 'change' }],
   qualificationCertificate: isDoctor.value
@@ -268,6 +286,10 @@ function attachmentName(attachment) {
   return attachment?.originalFilename || attachment?.filePath || '未上传'
 }
 
+async function loadSupplierOptions() {
+  supplierOptions.value = await getSupplierOptions()
+}
+
 function handleUserTypeChange(userType) {
   if (userType === USER_TYPE.PATIENT) {
     form.title = ''
@@ -299,7 +321,7 @@ async function handleRegister() {
       sex: form.sex,
       idCardNumber: form.idCardNumber,
       title: form.title,
-      inviteCode: form.inviteCode,
+      supplierId: form.supplierId,
       idCardFront: form.idCardFront,
       idCardBack: form.idCardBack,
       qualificationCertificate: form.qualificationCertificate
@@ -332,6 +354,8 @@ onBeforeUnmount(() => {
   stopCountdown?.()
   stopSmsCountdown?.()
 })
+
+onMounted(loadSupplierOptions)
 </script>
 
 <style lang="scss" scoped>

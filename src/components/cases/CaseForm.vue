@@ -34,7 +34,7 @@
       >
         选择附件
       </el-button>
-      <div class="attachment-tip">最多上传 5 个附件，单个文件不超过 5 MB</div>
+      <div class="attachment-tip">单个文件不超过 50 MB</div>
       <ul v-if="attachmentFiles.length" class="attachment-list">
         <li v-for="(file, index) in attachmentFiles" :key="file.uid">
           <span>{{ file.name }}</span>
@@ -138,12 +138,8 @@ function openAttachmentPicker() {
 
 async function handleAttachmentChange(event) {
   const selectedFiles = Array.from(event.target.files || [])
-  const remainingSlots = 5 - attachmentFiles.value.length
-  if (selectedFiles.length > remainingSlots) {
-    ElMessage.warning('最多上传 5 个附件')
-  }
 
-  const validFiles = selectedFiles.slice(0, remainingSlots).filter(file => {
+  const validFiles = selectedFiles.filter(file => {
     const extension = file.name.split('.').pop()?.toLowerCase()
     if (!allowedAttachmentExtensions.includes(extension)) {
       ElMessage.error(`${file.name}：不支持该附件格式`)
