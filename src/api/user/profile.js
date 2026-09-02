@@ -22,7 +22,7 @@ export function uploadProfileAttachment(file) {
   return request({
     url: '/file/upload',
     method: 'post',
-    params: { business: 'case-register' },
+    params: { business: 'profile' },
     data: formData
   })
 }

@@ -26,10 +26,10 @@ describe('user profile api', () => {
     const { submitProfile } = await import('@/api/user/profile')
     const payload = {
       nickName: '张医生',
-      sex: '1',
       phone: '13800000000',
       idCardNumber: '110101199001011234',
       title: '主治医师',
+      supplierId: 1,
       idCardFront: { filePath: 'front.png' },
       idCardBack: { filePath: 'back.png' },
       qualificationCertificate: { filePath: 'qualification.png' }
@@ -53,7 +53,7 @@ describe('user profile api', () => {
     const requestConfig = requestMock.mock.calls[0][0]
     expect(requestConfig.url).toBe('/file/upload')
     expect(requestConfig.method).toBe('post')
-    expect(requestConfig.params).toEqual({ business: 'case-register' })
+    expect(requestConfig.params).toEqual({ business: 'profile' })
     expect(requestConfig.data).toBeInstanceOf(FormData)
     expect(requestConfig.data.get('file')).toBeInstanceOf(Blob)
   })

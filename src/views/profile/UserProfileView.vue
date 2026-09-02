@@ -36,27 +36,44 @@
           />
         </header>
 
-        <el-form label-position="top" @submit.prevent="handleSubmit">
-          <el-form-item label="姓名" required>
+        <el-form
+          ref="formRef"
+          :model="form"
+          :rules="rules"
+          label-position="top"
+          @submit.prevent="handleSubmit"
+        >
+          <el-form-item label="姓名" prop="nickName" required>
             <el-input v-model="form.nickName" maxlength="30" show-word-limit placeholder="请输入姓名" />
           </el-form-item>
-          <el-form-item label="性别" required>
-            <el-select v-model="form.sex" placeholder="请选择性别" style="width: 100%">
-              <el-option label="男" value="0" />
-              <el-option label="女" value="1" />
-              <el-option label="未知" value="2" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="手机号" required>
+          <el-form-item label="手机号" prop="phone" required>
             <el-input v-model="form.phone" maxlength="20" placeholder="请输入手机号" />
           </el-form-item>
-          <el-form-item label="身份证号码" required>
+          <el-form-item label="邀请人" prop="supplierId" required>
+            <el-select
+              v-model="form.supplierId"
+              filterable
+              clearable
+              :filter-method="filterSupplierOptions"
+              placeholder="请输入邀请人编号或姓名"
+              style="width: 100%"
+              @visible-change="handleSupplierSelectVisible"
+            >
+              <el-option
+                v-for="supplier in visibleSupplierOptions"
+                :key="supplier.id"
+                :label="`${supplier.name}（${supplier.id}）`"
+                :value="supplier.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="身份证号码" prop="idCardNumber" required>
             <el-input v-model="form.idCardNumber" maxlength="30" placeholder="请输入身份证号码" />
           </el-form-item>
-          <el-form-item v-if="isDoctor" label="职称" required>
+          <el-form-item v-if="isDoctor" label="职称" prop="title" required>
             <el-input v-model="form.title" maxlength="50" placeholder="请输入职称" />
           </el-form-item>
-          <el-form-item label="身份证正面图片">
+          <el-form-item label="身份证正面图片" prop="idCardFront">
             <div class="profile-attachment">
               <span>{{ attachmentName(form.idCardFront) }}</span>
               <el-upload
@@ -78,7 +95,7 @@
               </el-button>
             </div>
           </el-form-item>
-          <el-form-item label="身份证反面图片">
+          <el-form-item label="身份证反面图片" prop="idCardBack">
             <div class="profile-attachment">
               <span>{{ attachmentName(form.idCardBack) }}</span>
               <el-upload
@@ -100,7 +117,7 @@
               </el-button>
             </div>
           </el-form-item>
-          <el-form-item v-if="isDoctor" label="医师职业资格证图片">
+          <el-form-item v-if="isDoctor" label="医师职业资格证图片" prop="qualificationCertificate">
             <div class="profile-attachment">
               <span>{{ attachmentName(form.qualificationCertificate) }}</span>
               <el-upload
@@ -160,21 +177,25 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import AttachmentPreviewDialog from '@/components/attachments/AttachmentPreviewDialog.vue'
+import { getSupplierOptions } from '@/api/user/supplier'
 import { uploadProfileAttachment } from '@/api/user/profile'
 import { normalizeEnumCode, USER_STATUS, USER_TYPE } from '@/constants/user'
 
 const router = useRouter()
 const userStore = useUserStore()
+const formRef = ref()
 const loadingProfile = ref(false)
 const submitting = ref(false)
 const deleting = ref(false)
 const previewOpen = ref(false)
 const previewAttachment = ref(null)
 const fieldUploading = ref('')
+const supplierOptions = ref([])
+const visibleSupplierOptions = ref([])
 const form = reactive({
   nickName: '',
-  sex: '',
   phone: '',
+  supplierId: null,
   idCardNumber: '',
   title: '',
   idCardFront: null,
@@ -193,13 +214,31 @@ const canDeleteAccount = computed(() => [
   USER_STATUS.REGISTER
 ].includes(normalizedProfileStatus.value))
 
+const rules = computed(() => ({
+  nickName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+  ],
+  supplierId: [{ required: true, message: '请选择邀请人', trigger: 'change' }],
+  idCardNumber: [{ required: true, message: '请输入身份证号码', trigger: 'blur' }],
+  idCardFront: [{ required: true, message: '请上传身份证正面图片', trigger: 'change' }],
+  idCardBack: [{ required: true, message: '请上传身份证反面图片', trigger: 'change' }],
+  title: isDoctor.value
+    ? [{ required: true, message: '请输入职称', trigger: 'blur' }]
+    : [],
+  qualificationCertificate: isDoctor.value
+    ? [{ required: true, message: '请上传职业资格证图片', trigger: 'change' }]
+    : []
+}))
+
 async function loadProfile() {
   loadingProfile.value = true
   try {
     const profile = await userStore.loadProfile()
     form.nickName = profile?.nickName || ''
-    form.sex = profile?.sex || ''
     form.phone = profile?.phone || ''
+    form.supplierId = profile?.supplierId || null
     form.idCardNumber = profile?.idCardNumber || ''
     form.title = profile?.title || ''
     form.idCardFront = profile?.idCardFront || null
@@ -215,24 +254,16 @@ async function handleSubmit() {
     ElMessage.warning('请等待证件图片上传完成')
     return
   }
-  if (!form.idCardFront || !form.idCardBack) {
-    ElMessage.warning('请先上传身份证图片')
-    return
-  }
-  if (isDoctor.value && !form.qualificationCertificate) {
-    ElMessage.warning('请先上传资格证图片')
-    return
-  }
-  if (!form.sex) {
-    ElMessage.warning('请选择性别')
+  const valid = await formRef.value?.validate().catch(() => false)
+  if (!valid) {
     return
   }
   submitting.value = true
   try {
     await userStore.submitProfile({
       nickName: form.nickName,
-      sex: form.sex,
       phone: form.phone,
+      supplierId: form.supplierId,
       idCardNumber: form.idCardNumber,
       title: isDoctor.value ? form.title : '',
       idCardFront: form.idCardFront,
@@ -242,6 +273,31 @@ async function handleSubmit() {
     ElMessage.success('资料已提交，等待管理员审核')
   } finally {
     submitting.value = false
+  }
+}
+
+function filterSupplierOptions(keyword) {
+  const value = keyword.trim()
+  if (!value) {
+    visibleSupplierOptions.value = supplierOptions.value
+    return
+  }
+
+  if (/^\d+$/.test(value)) {
+    visibleSupplierOptions.value = supplierOptions.value.filter(
+      supplier => String(supplier.id) === value
+    )
+    return
+  }
+
+  visibleSupplierOptions.value = supplierOptions.value.filter(
+    supplier => supplier.name.includes(value)
+  )
+}
+
+function handleSupplierSelectVisible(visible) {
+  if (visible) {
+    visibleSupplierOptions.value = supplierOptions.value
   }
 }
 
@@ -302,7 +358,15 @@ async function handleDeleteAccount() {
   }
 }
 
-onMounted(loadProfile)
+onMounted(async () => {
+  await Promise.all([
+    loadProfile(),
+    getSupplierOptions().then(options => {
+      supplierOptions.value = options || []
+      visibleSupplierOptions.value = supplierOptions.value
+    })
+  ])
+})
 </script>
 
 <style lang="scss" scoped>
