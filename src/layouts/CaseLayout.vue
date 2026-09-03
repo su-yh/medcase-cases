@@ -69,7 +69,7 @@ onMounted(loadBackendVersion)
 
 async function handleAccountCommand(command) {
   if (command === 'profile') {
-    await router.push('/profile')
+    await router.push('/account/profile')
     return
   }
   if (command === 'logout') {

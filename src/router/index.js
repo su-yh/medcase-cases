@@ -26,6 +26,15 @@ const routes = [
     }
   },
   {
+    path: '/profile',
+    name: 'ReviewSubmit',
+    component: () => import('@/views/profile/ReviewSubmitView.vue'),
+    meta: {
+      title: '资料提交',
+      requiresAuth: true
+    }
+  },
+  {
     path: '/home',
     redirect: '/cases'
   },
@@ -41,7 +50,7 @@ const routes = [
         redirect: '/cases'
       },
       {
-        path: 'profile',
+        path: 'account/profile',
         name: 'UserProfile',
         component: () => import('@/views/profile/AccountProfileView.vue'),
         meta: {
@@ -110,10 +119,14 @@ router.beforeEach(async (to) => {
   }
 
   if (to.path === '/profile') {
-    if (canVisitUserProfile(status)) {
-      return true
+    if (canAccessCaseBusiness(status)) {
+      return '/account/profile'
     }
-    return canAccessCaseBusiness(status) ? '/home' : '/login'
+    return canVisitUserProfile(status) ? true : '/login'
+  }
+
+  if (to.path === '/account/profile') {
+    return canAccessCaseBusiness(status) ? true : '/profile'
   }
 
   if (to.meta?.requiresAuth && !canAccessCaseBusiness(status)) {

@@ -8,9 +8,10 @@ const routerSource = readFileSync(
 )
 
 describe('profile route layout', () => {
-  it('renders the profile page as a child of the case layout', () => {
-    expect(routerSource).toContain("path: 'profile'")
+  it('keeps review submission outside the case layout', () => {
+    expect(routerSource).toContain("path: '/profile'")
+    expect(routerSource).toContain("component: () => import('@/views/profile/ReviewSubmitView.vue')")
+    expect(routerSource).toContain("path: 'account/profile'")
     expect(routerSource).toContain("component: () => import('@/views/profile/AccountProfileView.vue')")
-    expect(routerSource).not.toContain("path: '/profile'")
   })
 })
