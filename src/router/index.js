@@ -26,15 +26,6 @@ const routes = [
     }
   },
   {
-    path: '/profile',
-    name: 'UserProfile',
-    component: () => import('@/views/profile/UserProfileView.vue'),
-    meta: {
-      title: '资料提交',
-      requiresAuth: true
-    }
-  },
-  {
     path: '/home',
     redirect: '/cases'
   },
@@ -48,6 +39,14 @@ const routes = [
       {
         path: '',
         redirect: '/cases'
+      },
+      {
+        path: 'profile',
+        name: 'UserProfile',
+        component: () => import('@/views/profile/AccountProfileView.vue'),
+        meta: {
+          title: '个人信息'
+        }
       },
       {
         path: 'cases',

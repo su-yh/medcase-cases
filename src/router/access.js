@@ -9,6 +9,7 @@ export function canVisitUserProfile(status) {
   return normalizedStatus === USER_STATUS.REGISTER
     || normalizedStatus === USER_STATUS.REVIEW_FAILED
     || normalizedStatus === USER_STATUS.PENDING_REVIEW
+    || normalizedStatus === USER_STATUS.OK
 }
 
 export function getUserLandingPath(status, fallbackPath = '/home') {

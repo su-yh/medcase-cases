@@ -10,26 +10,29 @@
         <router-link to="/cases">病例中心</router-link>
         <router-link to="/cases/submit">提交病例</router-link>
       </nav>
-
-      <div class="case-nav-caption">账户</div>
-      <nav class="case-nav" aria-label="账户导航">
-        <button type="button" @click="handleLogout">退出登录</button>
-      </nav>
-
-      <div class="case-account">
-        <span class="case-avatar">{{ userType.charAt(0) }}</span>
-        <span>
-          <strong>{{ userType }}账号</strong>
-          <small>前端 v{{ appVersion }}</small>
-          <small>后端 v{{ backendVersion }}</small>
-        </span>
-      </div>
     </aside>
 
     <main class="case-main">
       <header class="case-topbar">
-        <strong>病例工作台</strong>
-        <span>审核由管理端完成，{{ userType }}端只查看结果</span>
+        <div>
+          <strong>病例工作台</strong>
+          <span>审核由管理端完成，{{ userType }}端只查看结果</span>
+        </div>
+        <el-dropdown trigger="hover" @command="handleAccountCommand">
+          <button type="button" class="case-account-trigger">
+            <span class="case-avatar">{{ userType.charAt(0) }}</span>
+            <span>
+              <strong>{{ userType }}账号</strong>
+              <small>前端 v{{ appVersion }} / 后端 v{{ backendVersion }}</small>
+            </span>
+          </button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="profile">个人信息</el-dropdown-item>
+              <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </header>
       <section class="case-content">
         <router-view />
@@ -39,6 +42,7 @@
 </template>
 
 <script setup>
+import { ElDropdown, ElDropdownItem, ElDropdownMenu } from 'element-plus'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
@@ -62,6 +66,16 @@ async function loadBackendVersion() {
 }
 
 onMounted(loadBackendVersion)
+
+async function handleAccountCommand(command) {
+  if (command === 'profile') {
+    await router.push('/profile')
+    return
+  }
+  if (command === 'logout') {
+    await handleLogout()
+  }
+}
 
 async function handleLogout() {
   await userStore.logout()
@@ -109,8 +123,7 @@ async function handleLogout() {
   gap: 6px;
 }
 
-.case-nav a,
-.case-nav button {
+.case-nav a {
   width: 100%;
   padding: 11px 12px;
   color: var(--el-text-color-secondary);
@@ -124,30 +137,32 @@ async function handleLogout() {
 }
 
 .case-nav a:hover,
-.case-nav a.router-link-active,
-.case-nav button:hover {
+.case-nav a.router-link-active {
   color: var(--el-color-primary);
   background: var(--el-color-primary-light-9);
 }
 
-.case-nav-caption {
-  margin: 22px 12px 8px;
-  color: var(--el-text-color-placeholder);
-  font-size: 12px;
-}
-
-.case-account {
+.case-account-trigger {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: auto;
-  padding: 16px 12px 0;
-  border-top: 1px solid var(--el-border-color);
+  padding: 0;
+  color: inherit;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
 }
 
-.case-account small {
+.case-account-trigger strong,
+.case-account-trigger small {
   display: block;
+}
+
+.case-account-trigger small {
   color: var(--el-text-color-placeholder);
+  font-size: 12px;
 }
 
 .case-main {
@@ -164,9 +179,11 @@ async function handleLogout() {
   border-bottom: 1px solid var(--el-border-color);
 }
 
-.case-topbar span {
+.case-topbar > div > span {
+  display: block;
   color: var(--el-text-color-secondary);
   font-size: 13px;
+  margin-top: 4px;
 }
 
 .case-content {
@@ -189,13 +206,16 @@ async function handleLogout() {
     overflow-x: auto;
   }
 
-  .case-nav a,
-  .case-nav button {
+  .case-nav a {
     min-width: max-content;
   }
 
-  .case-nav-caption,
-  .case-account {
+  .case-topbar {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .case-account-trigger > span:last-child {
     display: none;
   }
 

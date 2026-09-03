@@ -17,6 +17,10 @@ describe('case route access', () => {
     expect(canVisitUserProfile(USER_STATUS.PENDING_REVIEW)).toBe(true)
   })
 
+  it('allows approved users to maintain their profile', () => {
+    expect(canVisitUserProfile(USER_STATUS.OK)).toBe(true)
+  })
+
   it('allows only approved users to access case business pages', () => {
     expect(canAccessCaseBusiness(USER_STATUS.OK)).toBe(true)
     expect(canAccessCaseBusiness(USER_STATUS.REGISTER)).toBe(false)

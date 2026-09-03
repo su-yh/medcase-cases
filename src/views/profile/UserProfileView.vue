@@ -1,57 +1,53 @@
 <template>
   <main class="profile-page">
     <el-card v-loading="loadingProfile" class="profile-card" shadow="never">
-      <template v-if="pendingReview">
-        <div class="profile-state">
-          <h1>资料已提交</h1>
-          <p>资料正在等待管理员审核，通过后即可进入病例工作台。</p>
-          <div class="profile-actions">
-            <el-button @click="handleLogout">退出登录</el-button>
-            <el-button
-              v-if="canDeleteAccount"
-              type="danger"
-              plain
-              :loading="deleting"
-              @click="handleDeleteAccount"
-            >
-              删除账号
-            </el-button>
-          </div>
-        </div>
-      </template>
-
-      <template v-else>
+      <div class="profile-header">
         <header class="profile-heading">
           <span v-if="reviewFailed" class="profile-state-label">审核未通过</span>
-          <h1>{{ reviewFailed ? '重新提交资料' : '完善资料' }}</h1>
-          <p>{{ reviewFailed ? '请更新资料后重新提交审核。' : '请填写基本资料后提交管理员审核。' }}</p>
-          <el-alert
-            v-if="reviewFailed && userStore.userInfo?.reviewReason"
-            class="review-reason"
-            title="审核拒绝原因"
-            :description="userStore.userInfo.reviewReason"
-            type="error"
-            :closable="false"
-            show-icon
-          />
+          <h1>个人信息</h1>
+          <p>{{ reviewEditable ? '请完善审核资料后提交管理员审核。' : '审核资料已提交，以下内容不可修改。' }}</p>
         </header>
+        <div class="profile-actions">
+          <el-button @click="openPhoneDialog">修改手机号</el-button>
+          <el-button type="primary" @click="openPasswordDialog">修改密码</el-button>
+        </div>
+      </div>
 
+      <el-alert
+        v-if="reviewFailed && userStore.userInfo?.reviewReason"
+        class="review-reason"
+        title="审核拒绝原因"
+        :description="userStore.userInfo.reviewReason"
+        type="error"
+        :closable="false"
+        show-icon
+      />
+
+      <section class="profile-section">
+        <h2>审核资料</h2>
         <el-form
-          ref="formRef"
+          ref="profileFormRef"
           :model="form"
           :rules="rules"
           label-position="top"
           @submit.prevent="handleSubmit"
         >
           <el-form-item label="姓名" prop="nickName" required>
-            <el-input v-model="form.nickName" maxlength="30" show-word-limit placeholder="请输入姓名" />
+            <el-input
+              v-model="form.nickName"
+              :disabled="!reviewEditable"
+              maxlength="30"
+              show-word-limit
+              placeholder="请输入姓名"
+            />
           </el-form-item>
-          <el-form-item label="手机号" prop="phone" required>
-            <el-input v-model="form.phone" maxlength="20" placeholder="请输入手机号" />
+          <el-form-item label="用户类型">
+            <el-input :model-value="isDoctor ? '医生' : '患者'" disabled />
           </el-form-item>
           <el-form-item label="邀请人" prop="supplierId" required>
             <el-select
               v-model="form.supplierId"
+              :disabled="!reviewEditable"
               filterable
               clearable
               :filter-method="filterSupplierOptions"
@@ -67,16 +63,35 @@
               />
             </el-select>
           </el-form-item>
+          <el-form-item label="手机号" prop="phone" required>
+            <el-input
+              v-model="form.phone"
+              :disabled="!reviewEditable"
+              maxlength="20"
+              placeholder="请输入手机号"
+            />
+          </el-form-item>
           <el-form-item label="身份证号码" prop="idCardNumber" required>
-            <el-input v-model="form.idCardNumber" maxlength="30" placeholder="请输入身份证号码" />
+            <el-input
+              v-model="form.idCardNumber"
+              :disabled="!reviewEditable"
+              maxlength="30"
+              placeholder="请输入身份证号码"
+            />
           </el-form-item>
           <el-form-item v-if="isDoctor" label="职称" prop="title" required>
-            <el-input v-model="form.title" maxlength="50" placeholder="请输入职称" />
+            <el-input
+              v-model="form.title"
+              :disabled="!reviewEditable"
+              maxlength="50"
+              placeholder="请输入职称"
+            />
           </el-form-item>
           <el-form-item label="身份证正面图片" prop="idCardFront">
             <div class="profile-attachment">
               <span>{{ attachmentName(form.idCardFront) }}</span>
               <el-upload
+                v-if="reviewEditable"
                 :limit="1"
                 :show-file-list="false"
                 :auto-upload="false"
@@ -99,6 +114,7 @@
             <div class="profile-attachment">
               <span>{{ attachmentName(form.idCardBack) }}</span>
               <el-upload
+                v-if="reviewEditable"
                 :limit="1"
                 :show-file-list="false"
                 :auto-upload="false"
@@ -121,13 +137,16 @@
             <div class="profile-attachment">
               <span>{{ attachmentName(form.qualificationCertificate) }}</span>
               <el-upload
+                v-if="reviewEditable"
                 :limit="1"
                 :show-file-list="false"
                 :auto-upload="false"
                 accept="image/*"
                 :on-change="file => handleAttachmentChange('qualificationCertificate', file)"
               >
-                <el-button :loading="fieldUploading === 'qualificationCertificate'">上传</el-button>
+                <el-button :loading="fieldUploading === 'qualificationCertificate'">
+                  上传
+                </el-button>
               </el-upload>
               <el-button
                 v-if="form.qualificationCertificate?.filePath"
@@ -140,6 +159,7 @@
             </div>
           </el-form-item>
           <el-button
+            v-if="reviewEditable"
             type="primary"
             native-type="submit"
             :loading="submitting"
@@ -148,26 +168,86 @@
             提交审核
           </el-button>
         </el-form>
+      </section>
 
-        <div class="profile-footer">
-          <el-button text @click="handleLogout">退出登录</el-button>
-          <el-button
-            v-if="canDeleteAccount"
-            text
-            type="danger"
-            :loading="deleting"
-            @click="handleDeleteAccount"
-          >
-            删除账号
-          </el-button>
-        </div>
-      </template>
+      <div class="profile-footer">
+        <el-button
+          v-if="canDeleteAccount"
+          text
+          type="danger"
+          :loading="deleting"
+          @click="handleDeleteAccount"
+        >
+          删除账号
+        </el-button>
+      </div>
     </el-card>
 
     <AttachmentPreviewDialog
       v-model="previewOpen"
       :attachment="previewAttachment"
     />
+
+    <el-dialog v-model="phoneDialogVisible" title="修改手机号" width="420px">
+      <el-form
+        ref="phoneFormRef"
+        :model="phoneForm"
+        :rules="phoneRules"
+        label-position="top"
+        @submit.prevent="handlePhoneUpdate"
+      >
+        <el-form-item label="手机号" prop="phone" required>
+          <el-input v-model="phoneForm.phone" maxlength="20" placeholder="请输入手机号" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="phoneDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="phoneSaving" @click="handlePhoneUpdate">
+          保存
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="passwordDialogVisible" title="修改密码" width="420px">
+      <el-form
+        ref="passwordFormRef"
+        :model="passwordForm"
+        :rules="passwordRules"
+        label-position="top"
+        @submit.prevent="handlePasswordUpdate"
+      >
+        <el-form-item label="旧密码" prop="oldPassword" required>
+          <el-input
+            v-model="passwordForm.oldPassword"
+            type="password"
+            show-password
+            placeholder="请输入旧密码"
+          />
+        </el-form-item>
+        <el-form-item label="新密码" prop="newPassword" required>
+          <el-input
+            v-model="passwordForm.newPassword"
+            type="password"
+            show-password
+            placeholder="请输入新密码"
+          />
+        </el-form-item>
+        <el-form-item label="确认新密码" prop="confirmPassword" required>
+          <el-input
+            v-model="passwordForm.confirmPassword"
+            type="password"
+            show-password
+            placeholder="请再次输入新密码"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="passwordDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="passwordSaving" @click="handlePasswordUpdate">
+          保存
+        </el-button>
+      </template>
+    </el-dialog>
   </main>
 </template>
 
@@ -183,9 +263,15 @@ import { normalizeEnumCode, USER_STATUS, USER_TYPE } from '@/constants/user'
 
 const router = useRouter()
 const userStore = useUserStore()
-const formRef = ref()
+const profileFormRef = ref()
+const phoneFormRef = ref()
+const passwordFormRef = ref()
+const phoneDialogVisible = ref(false)
+const passwordDialogVisible = ref(false)
 const loadingProfile = ref(false)
 const submitting = ref(false)
+const phoneSaving = ref(false)
+const passwordSaving = ref(false)
 const deleting = ref(false)
 const previewOpen = ref(false)
 const previewAttachment = ref(null)
@@ -202,11 +288,22 @@ const form = reactive({
   idCardBack: null,
   qualificationCertificate: null
 })
+const phoneForm = reactive({
+  phone: ''
+})
+const passwordForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
 
 const profileStatus = computed(() => userStore.userInfo?.status)
 const normalizedProfileStatus = computed(() => normalizeEnumCode(profileStatus.value))
 const isDoctor = computed(() => normalizeEnumCode(userStore.userInfo?.userType) === USER_TYPE.DOCTOR)
-const pendingReview = computed(() => normalizedProfileStatus.value === USER_STATUS.PENDING_REVIEW)
+const reviewEditable = computed(() => [
+  USER_STATUS.REGISTER,
+  USER_STATUS.REVIEW_FAILED
+].includes(normalizedProfileStatus.value))
 const reviewFailed = computed(() => normalizedProfileStatus.value === USER_STATUS.REVIEW_FAILED)
 const canDeleteAccount = computed(() => [
   USER_STATUS.PENDING_REVIEW,
@@ -231,6 +328,27 @@ const rules = computed(() => ({
     ? [{ required: true, message: '请上传职业资格证图片', trigger: 'change' }]
     : []
 }))
+const phoneRules = {
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+  ]
+}
+const passwordRules = {
+  oldPassword: [{ required: true, message: '请输入旧密码', trigger: 'blur' }],
+  newPassword: [{ required: true, message: '请输入新密码', trigger: 'blur' }],
+  confirmPassword: [
+    { required: true, message: '请再次输入新密码', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        callback(value === passwordForm.newPassword
+          ? undefined
+          : new Error('两次输入的新密码不一致'))
+      },
+      trigger: 'blur'
+    }
+  ]
+}
 
 async function loadProfile() {
   loadingProfile.value = true
@@ -244,6 +362,7 @@ async function loadProfile() {
     form.idCardFront = profile?.idCardFront || null
     form.idCardBack = profile?.idCardBack || null
     form.qualificationCertificate = profile?.qualificationCertificate || null
+    phoneForm.phone = profile?.phone || ''
   } finally {
     loadingProfile.value = false
   }
@@ -254,7 +373,7 @@ async function handleSubmit() {
     ElMessage.warning('请等待证件图片上传完成')
     return
   }
-  const valid = await formRef.value?.validate().catch(() => false)
+  const valid = await profileFormRef.value?.validate().catch(() => false)
   if (!valid) {
     return
   }
@@ -273,6 +392,42 @@ async function handleSubmit() {
     ElMessage.success('资料已提交，等待管理员审核')
   } finally {
     submitting.value = false
+  }
+}
+
+async function handlePhoneUpdate() {
+  const valid = await phoneFormRef.value?.validate().catch(() => false)
+  if (!valid) {
+    return
+  }
+  phoneSaving.value = true
+  try {
+    await userStore.updateProfilePhone({ phone: phoneForm.phone })
+    phoneDialogVisible.value = false
+    ElMessage.success('手机号修改成功')
+  } finally {
+    phoneSaving.value = false
+  }
+}
+
+async function handlePasswordUpdate() {
+  const valid = await passwordFormRef.value?.validate().catch(() => false)
+  if (!valid) {
+    return
+  }
+  passwordSaving.value = true
+  try {
+    await userStore.updateProfilePassword({
+      oldPassword: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword
+    })
+    passwordForm.oldPassword = ''
+    passwordForm.newPassword = ''
+    passwordForm.confirmPassword = ''
+    passwordDialogVisible.value = false
+    ElMessage.success('密码修改成功')
+  } finally {
+    passwordSaving.value = false
   }
 }
 
@@ -328,9 +483,16 @@ function openPreview(attachment) {
   previewOpen.value = true
 }
 
-async function handleLogout() {
-  await userStore.logout()
-  await router.replace('/login')
+function openPhoneDialog() {
+  phoneForm.phone = form.phone
+  phoneDialogVisible.value = true
+}
+
+function openPasswordDialog() {
+  passwordForm.oldPassword = ''
+  passwordForm.newPassword = ''
+  passwordForm.confirmPassword = ''
+  passwordDialogVisible.value = true
 }
 
 async function handleDeleteAccount() {
@@ -371,20 +533,26 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .profile-page {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
+  min-height: 100%;
+  padding: 28px;
   background: var(--el-bg-color-page);
 }
 
 .profile-card {
-  width: min(100%, 520px);
+  width: min(100%, 920px);
+  margin: 0 auto;
   border-radius: 8px;
 }
 
+.profile-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
 .profile-heading {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 
   h1 {
     margin: 6px 0 8px;
@@ -400,8 +568,30 @@ onMounted(async () => {
   }
 }
 
+.profile-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.profile-section {
+  padding-top: 20px;
+  border-top: 1px solid var(--el-border-color-lighter);
+
+  & + .profile-section {
+    margin-top: 24px;
+  }
+
+  h2 {
+    margin: 0 0 20px;
+    color: var(--el-text-color-primary);
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
 .review-reason {
-  margin-top: 16px;
+  margin: 0 0 24px;
 }
 
 .profile-state-label {
@@ -409,33 +599,11 @@ onMounted(async () => {
   font-size: 13px;
 }
 
-.profile-state {
-  padding: 20px 4px;
-  text-align: center;
-
-  h1 {
-    margin: 0 0 12px;
-    font-size: 24px;
-  }
-
-  p {
-    margin: 0 0 28px;
-    color: var(--el-text-color-secondary);
-    line-height: 1.6;
-  }
-}
-
-.profile-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-
 .profile-footer {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 24px;
 }
 
 .profile-attachment {
@@ -451,5 +619,19 @@ onMounted(async () => {
   color: var(--el-text-color-secondary);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .profile-page {
+    padding: 16px;
+  }
+
+  .profile-header {
+    display: block;
+  }
+
+  .profile-actions {
+    margin-bottom: 24px;
+  }
 }
 </style>

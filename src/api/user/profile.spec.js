@@ -44,6 +44,35 @@ describe('user profile api', () => {
     })
   })
 
+  it('updates the current user phone', async () => {
+    const { updateProfilePhone } = await import('@/api/user/profile')
+    const data = { phone: '13900000000' }
+
+    updateProfilePhone(data)
+
+    expect(requestMock).toHaveBeenCalledWith({
+      url: '/biz/user-profile/phone',
+      method: 'put',
+      data
+    })
+  })
+
+  it('updates the current user password', async () => {
+    const { updateProfilePassword } = await import('@/api/user/profile')
+    const data = {
+      oldPassword: 'old-password',
+      newPassword: 'new-password'
+    }
+
+    updateProfilePassword(data)
+
+    expect(requestMock).toHaveBeenCalledWith({
+      url: '/biz/user-profile/password',
+      method: 'put',
+      data
+    })
+  })
+
   it('uploads user profile attachments through the storage endpoint', async () => {
     const { uploadProfileAttachment } = await import('@/api/user/profile')
     const file = new Blob(['front'], { type: 'image/png' })

@@ -5,7 +5,12 @@ import {
   logout as logoutApi,
   register as registerApi
 } from '@/api/user/auth'
-import { getMyProfile, submitProfile as submitProfileApi } from '@/api/user/profile'
+import {
+  getMyProfile,
+  submitProfile as submitProfileApi,
+  updateProfilePassword as updateProfilePasswordApi,
+  updateProfilePhone as updateProfilePhoneApi
+} from '@/api/user/profile'
 import { clearToken, getToken, setToken } from '@/utils/auth'
 
 const useUserStore = defineStore('user', {
@@ -28,6 +33,14 @@ const useUserStore = defineStore('user', {
     },
     async submitProfile(payload) {
       await submitProfileApi(payload)
+      return this.loadProfile()
+    },
+    async updateProfilePhone(payload) {
+      await updateProfilePhoneApi(payload)
+      return this.loadProfile()
+    },
+    async updateProfilePassword(payload) {
+      await updateProfilePasswordApi(payload)
       return this.loadProfile()
     },
     async register(payload) {
