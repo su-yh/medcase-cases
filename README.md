@@ -47,5 +47,4 @@ yarn build:prod
 
 ```bash
 zip -r dist/medcase-doctor-dist.zip dist
-zip -r dist/medcase-admin-dist.zip dist
 ```
