@@ -1,6 +1,6 @@
 {
   "name": "medcase-doctor",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "description": "MedCase 医生端前端",
   "private": true,
   "type": "module",
