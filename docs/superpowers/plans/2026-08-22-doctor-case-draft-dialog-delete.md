@@ -13,8 +13,8 @@
 ### Task 1: Lock Down Frontend API Contracts
 
 **Files:**
-- Modify: `/Users/suyunhong/suyh-develop/github/medcase-doctor/src/api/doctor/__tests__/cases.spec.js`
-- Modify: `/Users/suyunhong/suyh-develop/github/medcase-doctor/src/api/doctor/cases.js`
+- Modify: `/Users/suyunhong/suyh-develop/github/medcase-cases/src/api/doctor/__tests__/cases.spec.js`
+- Modify: `/Users/suyunhong/suyh-develop/github/medcase-cases/src/api/doctor/cases.js`
 
 - [x] **Step 1: Add failing API contract assertions**
 
@@ -76,7 +76,7 @@ Run the same command and expect the focused API suite to pass with zero failures
 ### Task 2: Implement Detail-Loading Draft Edit Modal
 
 **Files:**
-- Modify: `/Users/suyunhong/suyh-develop/github/medcase-doctor/src/components/cases/CaseEditDialog.vue`
+- Modify: `/Users/suyunhong/suyh-develop/github/medcase-cases/src/components/cases/CaseEditDialog.vue`
 
 - [x] **Step 1: Define the failing behavior checklist before implementation**
 
@@ -150,10 +150,10 @@ Expected: Vite build exits with code 0.
 ### Task 3: Close the Case Center Interaction Loop
 
 **Files:**
-- Modify: `/Users/suyunhong/suyh-develop/github/medcase-doctor/src/views/cases/CaseCenterView.vue`
-- Modify: `/Users/suyunhong/suyh-develop/github/medcase-doctor/src/views/cases/SubmitCaseView.vue`
-- Test: `/Users/suyunhong/suyh-develop/github/medcase-doctor/src/api/doctor/__tests__/cases.spec.js`
-- Test: `/Users/suyunhong/suyh-develop/github/medcase-doctor/src/utils/__tests__/doctorCase.spec.js`
+- Modify: `/Users/suyunhong/suyh-develop/github/medcase-cases/src/views/cases/CaseCenterView.vue`
+- Modify: `/Users/suyunhong/suyh-develop/github/medcase-cases/src/views/cases/SubmitCaseView.vue`
+- Test: `/Users/suyunhong/suyh-develop/github/medcase-cases/src/api/doctor/__tests__/cases.spec.js`
+- Test: `/Users/suyunhong/suyh-develop/github/medcase-cases/src/utils/__tests__/doctorCase.spec.js`
 
 - [x] **Step 1: Keep new-case navigation and remove old edit-page behavior**
 

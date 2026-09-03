@@ -1,7 +1,7 @@
 {
-  "name": "medcase-doctor",
+  "name": "medcase-cases",
   "version": "1.0.0",
-  "description": "MedCase 医生端前端",
+  "description": "MedCase 病例端前端",
   "private": true,
   "type": "module",
   "scripts": {

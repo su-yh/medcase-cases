@@ -1,6 +1,6 @@
-# MedCase 医生端前端
+# MedCase 病例端前端
 
-全新的医生端前端工程，技术栈与管理端保持一致：
+病例端前端工程，技术栈与管理端保持一致：
 
 - Vue 3
 - Element Plus
@@ -46,5 +46,5 @@ yarn build:prod
 ## zip压缩
 
 ```bash
-zip -r dist/medcase-doctor-dist.zip dist
+zip -r dist/medcase-cases-dist.zip dist
 ```
