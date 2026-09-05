@@ -1,6 +1,6 @@
 {
   "name": "medcase-cases",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MedCase 病例端前端",
   "private": true,
   "type": "module",
