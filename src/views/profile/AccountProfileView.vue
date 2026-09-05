@@ -24,10 +24,6 @@
       </div>
       <dl class="account-info-grid">
         <div>
-          <dt>账号</dt>
-          <dd>{{ account.username || '未设置' }}</dd>
-        </div>
-        <div>
           <dt>姓名</dt>
           <dd>{{ account.nickName || '未设置' }}</dd>
         </div>
@@ -321,7 +317,6 @@ const passwordFormRef = ref()
 const supplierOptions = ref([])
 const visibleSupplierOptions = ref([])
 const account = reactive({
-  username: '',
   nickName: '',
   userType: null,
   phone: '',
@@ -437,7 +432,6 @@ async function loadProfile() {
   loadingProfile.value = true
   try {
     const profile = await userStore.loadProfile()
-    account.username = profile?.username || ''
     account.nickName = profile?.nickName || ''
     account.userType = profile?.userType || null
     account.phone = profile?.phone || ''
