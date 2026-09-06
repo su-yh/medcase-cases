@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { clearToken, getToken } from './auth'
-import { getHttpStatusMessage, unwrapResponse } from './response'
+import { getHttpStatusMessage, USER_NOT_LOGIN_CODE, unwrapResponse } from './response'
 
 const service = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API,
@@ -39,7 +39,7 @@ service.interceptors.response.use(
     try {
       return unwrapResponse(response.data)
     } catch (error) {
-      if (error.code === 401) {
+      if (error.code === USER_NOT_LOGIN_CODE) {
         handleUnauthorized()
       }
       ElMessage.error(error.message || '请求失败')
@@ -51,7 +51,7 @@ service.interceptors.response.use(
     const message = error.response?.data?.msg || (status
       ? getHttpStatusMessage(status)
       : error.message || '请求失败')
-    if (status === 401 || error.response?.data?.code === 401) {
+    if (status === 401 || error.response?.data?.code === USER_NOT_LOGIN_CODE) {
       handleUnauthorized()
     }
     ElMessage.error(message)

@@ -12,6 +12,9 @@ const HTTP_STATUS_MESSAGES = {
   504: '网关请求超时'
 }
 
+export const BIZ_SUCCESS_CODE = 'OK'
+export const USER_NOT_LOGIN_CODE = 'error.code.user.not.login'
+
 export function getHttpStatusMessage(status) {
   return HTTP_STATUS_MESSAGES[status] || (status >= 500 ? '服务器异常，请稍后再试' : '请求失败，请稍后再试')
 }
@@ -21,7 +24,7 @@ export function unwrapResponse(payload) {
     throw new Error('请求失败')
   }
 
-  if (payload.code === 0 || payload.code === 200) {
+  if (payload.code === BIZ_SUCCESS_CODE) {
     return payload.data
   }
 
