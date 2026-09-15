@@ -7,6 +7,11 @@ const registerViewSource = readFileSync(
   'utf8'
 )
 
+const loginViewSource = readFileSync(
+  fileURLToPath(new URL('./LoginView.vue', import.meta.url)),
+  'utf8'
+)
+
 const profileViewSource = readFileSync(
   fileURLToPath(new URL('../profile/UserProfileView.vue', import.meta.url)),
   'utf8'
@@ -15,11 +20,19 @@ const profileViewSource = readFileSync(
 describe('user registration fields', () => {
   it('keeps registration limited to account fields', () => {
     expect(registerViewSource).toContain('prop="userType"')
-    expect(registerViewSource).toContain(':value="USER_TYPE.DOCTOR"')
-    expect(registerViewSource).toContain(':value="USER_TYPE.PATIENT"')
+    expect(registerViewSource).toContain('USER_TYPE_OPTIONS')
     expect(registerViewSource).not.toContain('prop="sex"')
     expect(registerViewSource).not.toContain('prop="supplierId"')
     expect(registerViewSource).not.toContain('idCardFront')
+  })
+
+  it('uses the shared persistent button selector on login and registration', () => {
+    for (const source of [loginViewSource, registerViewSource]) {
+      expect(source).toContain('getPreferredUserType')
+      expect(source).toContain('setPreferredUserType')
+      expect(source).toContain('user-type-button')
+      expect(source).not.toContain('<el-select')
+    }
   })
 
   it('includes SMS verification with the fixed development code', () => {

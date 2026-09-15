@@ -1,5 +1,5 @@
 <template>
-  <div class="auth-page">
+  <div class="auth-page" :style="authThemeStyle">
     <el-card class="auth-card" shadow="always">
       <h1>病例端注册</h1>
       <p>创建 MedCase 病例端账号。</p>
@@ -11,10 +11,20 @@
         @submit.prevent="handleRegister"
       >
         <el-form-item label="用户类型" prop="userType" required>
-          <el-select v-model="form.userType" style="width: 100%">
-            <el-option label="医生" :value="USER_TYPE.DOCTOR" />
-            <el-option label="患者" :value="USER_TYPE.PATIENT" />
-          </el-select>
+          <div class="user-type-buttons" role="radiogroup" aria-label="用户类型">
+            <button
+              v-for="option in USER_TYPE_OPTIONS"
+              :key="option.value"
+              type="button"
+              class="user-type-button"
+              :class="{ 'is-active': form.userType === option.value }"
+              role="radio"
+              :aria-checked="form.userType === option.value"
+              @click="selectUserType(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          </div>
         </el-form-item>
         <el-form-item label="用户名" prop="username" required>
           <el-input v-model="form.username" placeholder="请输入用户名" />
@@ -75,14 +85,19 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
 import { startCountdown } from '@/utils/countdown'
 import { isPasswordConfirmed } from '@/utils/register'
 import { sendRegisterSmsCode } from '@/api/user/auth'
-import { USER_TYPE } from '@/constants/user'
+import {
+  getPreferredUserType,
+  getUserTypeTheme,
+  setPreferredUserType,
+  USER_TYPE_OPTIONS
+} from '@/utils/userTypePreference'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -102,8 +117,23 @@ const form = reactive({
   confirmPassword: '',
   phone: '',
   smsCode: '999999',
-  userType: USER_TYPE.DOCTOR
+  userType: getPreferredUserType()
 })
+
+const currentTheme = computed(() => getUserTypeTheme(form.userType))
+const authThemeStyle = computed(() => ({
+  '--auth-primary': currentTheme.value.primary,
+  '--auth-primary-hover': currentTheme.value.primaryHover,
+  '--auth-primary-active': currentTheme.value.primaryActive,
+  '--auth-primary-soft': currentTheme.value.primarySoft,
+  '--auth-border': currentTheme.value.border,
+  '--auth-shadow': currentTheme.value.shadow,
+  '--auth-background': currentTheme.value.background
+}))
+
+function selectUserType(userType) {
+  form.userType = setPreferredUserType(userType)
+}
 
 const requiredRule = (label) => [
   { required: true, message: `请输入${label}`, trigger: 'blur' }
@@ -214,15 +244,65 @@ onBeforeUnmount(() => {
   display: grid;
   place-items: center;
   padding: 24px;
+  background: var(--auth-background);
+  transition: background 0.2s ease;
 }
 
 .auth-card {
   width: min(100%, 460px);
+  border: 1px solid var(--auth-border);
+  border-top: 4px solid var(--auth-primary);
+  box-shadow: var(--auth-shadow);
+}
+
+:deep(.el-button--primary) {
+  --el-button-bg-color: var(--auth-primary);
+  --el-button-border-color: var(--auth-primary);
+  --el-button-hover-bg-color: var(--auth-primary-hover);
+  --el-button-hover-border-color: var(--auth-primary-hover);
+  --el-button-active-bg-color: var(--auth-primary-active);
+  --el-button-active-border-color: var(--auth-primary-active);
 }
 
 .auth-actions {
   margin-top: 16px;
   text-align: center;
+
+  :deep(a) {
+    color: var(--auth-primary-hover);
+  }
+}
+
+.user-type-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.user-type-button {
+  min-height: 42px;
+  border: 1px solid var(--auth-border);
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2937;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.user-type-button:hover {
+  border-color: var(--auth-primary);
+  color: var(--auth-primary);
+  box-shadow: 0 6px 16px rgb(15 23 42 / 10%);
+}
+
+.user-type-button.is-active {
+  border-color: var(--auth-primary);
+  background: var(--auth-primary);
+  color: #fff;
+  box-shadow: 0 10px 20px rgb(15 23 42 / 16%);
 }
 
 .sms-code-field {

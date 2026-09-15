@@ -1,14 +1,24 @@
 <template>
-  <div class="auth-page">
+  <div class="auth-page" :style="authThemeStyle">
     <el-card class="auth-card" shadow="always">
       <h1>病例端登录</h1>
       <p>欢迎来到 MedCase 病例端</p>
       <el-form label-position="top" @submit.prevent="handleLogin">
         <el-form-item label="用户类型">
-          <el-select v-model="form.userType" style="width: 100%">
-            <el-option label="医生" :value="USER_TYPE.DOCTOR" />
-            <el-option label="患者" :value="USER_TYPE.PATIENT" />
-          </el-select>
+          <div class="user-type-buttons" role="radiogroup" aria-label="用户类型">
+            <button
+              v-for="option in USER_TYPE_OPTIONS"
+              :key="option.value"
+              type="button"
+              class="user-type-button"
+              :class="{ 'is-active': form.userType === option.value }"
+              role="radio"
+              :aria-checked="form.userType === option.value"
+              @click="selectUserType(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          </div>
         </el-form-item>
         <el-form-item label="用户名">
           <el-input v-model="form.username" placeholder="请输入用户名" />
@@ -40,11 +50,16 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getCaptcha } from '@/api/user/auth'
 import useUserStore from '@/stores/user'
-import { USER_TYPE } from '@/constants/user'
+import {
+  getPreferredUserType,
+  getUserTypeTheme,
+  setPreferredUserType,
+  USER_TYPE_OPTIONS
+} from '@/utils/userTypePreference'
 
 const route = useRoute()
 const router = useRouter()
@@ -57,8 +72,23 @@ const form = reactive({
   password: '',
   code: '',
   uuid: '',
-  userType: USER_TYPE.DOCTOR
+  userType: getPreferredUserType()
 })
+
+const currentTheme = computed(() => getUserTypeTheme(form.userType))
+const authThemeStyle = computed(() => ({
+  '--auth-primary': currentTheme.value.primary,
+  '--auth-primary-hover': currentTheme.value.primaryHover,
+  '--auth-primary-active': currentTheme.value.primaryActive,
+  '--auth-primary-soft': currentTheme.value.primarySoft,
+  '--auth-border': currentTheme.value.border,
+  '--auth-shadow': currentTheme.value.shadow,
+  '--auth-background': currentTheme.value.background
+}))
+
+function selectUserType(userType) {
+  form.userType = setPreferredUserType(userType)
+}
 
 async function loadCaptcha() {
   const result = await getCaptcha()
@@ -86,23 +116,25 @@ onMounted(loadCaptcha)
   align-items: center;
   justify-content: center;
   padding: 24px;
+  background: var(--auth-background);
+  transition: background 0.2s ease;
 }
 
 .auth-card {
   width: 100%;
   max-width: 420px;
-  border: 1px solid #a9d4ff;
-  border-top: 4px solid #409eff;
-  box-shadow: 0 16px 32px rgb(64 158 255 / 16%);
+  border: 1px solid var(--auth-border);
+  border-top: 4px solid var(--auth-primary);
+  box-shadow: var(--auth-shadow);
 }
 
 :deep(.el-button--primary) {
-  --el-button-bg-color: #409eff;
-  --el-button-border-color: #409eff;
-  --el-button-hover-bg-color: #337ecc;
-  --el-button-hover-border-color: #337ecc;
-  --el-button-active-bg-color: #2864a8;
-  --el-button-active-border-color: #2864a8;
+  --el-button-bg-color: var(--auth-primary);
+  --el-button-border-color: var(--auth-primary);
+  --el-button-hover-bg-color: var(--auth-primary-hover);
+  --el-button-hover-border-color: var(--auth-primary-hover);
+  --el-button-active-bg-color: var(--auth-primary-active);
+  --el-button-active-border-color: var(--auth-primary-active);
 }
 
 h1 {
@@ -120,8 +152,40 @@ p {
   font-size: 14px;
 
   :deep(a) {
-    color: #337ecc;
+    color: var(--auth-primary-hover);
   }
+}
+
+.user-type-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.user-type-button {
+  min-height: 42px;
+  border: 1px solid var(--auth-border);
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2937;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.user-type-button:hover {
+  border-color: var(--auth-primary);
+  color: var(--auth-primary);
+  box-shadow: 0 6px 16px rgb(15 23 42 / 10%);
+}
+
+.user-type-button.is-active {
+  border-color: var(--auth-primary);
+  background: var(--auth-primary);
+  color: #fff;
+  box-shadow: 0 10px 20px rgb(15 23 42 / 16%);
 }
 
 .captcha-field {
