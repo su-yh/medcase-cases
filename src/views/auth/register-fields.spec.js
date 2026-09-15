@@ -19,19 +19,22 @@ const profileViewSource = readFileSync(
 
 describe('user registration fields', () => {
   it('keeps registration limited to account fields', () => {
-    expect(registerViewSource).toContain('prop="userType"')
     expect(registerViewSource).toContain('USER_TYPE_OPTIONS')
+    expect(registerViewSource).toContain('aria-label="用户类型"')
     expect(registerViewSource).not.toContain('prop="sex"')
     expect(registerViewSource).not.toContain('prop="supplierId"')
     expect(registerViewSource).not.toContain('idCardFront')
   })
 
-  it('uses the shared persistent button selector on login and registration', () => {
+  it('uses the shared persistent button selector without a visible form label', () => {
     for (const source of [loginViewSource, registerViewSource]) {
       expect(source).toContain('getPreferredUserType')
       expect(source).toContain('setPreferredUserType')
       expect(source).toContain('user-type-button')
+      expect(source).toContain('user-type-field')
       expect(source).not.toContain('<el-select')
+      expect(source).not.toContain('<el-form-item label="用户类型"')
+      expect(source).not.toContain('prop="userType"')
     }
   })
 

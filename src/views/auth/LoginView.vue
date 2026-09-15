@@ -4,7 +4,7 @@
       <h1>病例端登录</h1>
       <p>欢迎来到 MedCase 病例端</p>
       <el-form label-position="top" @submit.prevent="handleLogin">
-        <el-form-item label="用户类型">
+        <div class="user-type-field">
           <div class="user-type-buttons" role="radiogroup" aria-label="用户类型">
             <button
               v-for="option in USER_TYPE_OPTIONS"
@@ -19,7 +19,7 @@
               {{ option.label }}
             </button>
           </div>
-        </el-form-item>
+        </div>
         <el-form-item label="用户名">
           <el-input v-model="form.username" placeholder="请输入用户名" />
         </el-form-item>
@@ -161,6 +161,10 @@ p {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   width: 100%;
+}
+
+.user-type-field {
+  margin-bottom: 18px;
 }
 
 .user-type-button {

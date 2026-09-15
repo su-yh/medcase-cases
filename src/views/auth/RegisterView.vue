@@ -10,7 +10,7 @@
         label-position="top"
         @submit.prevent="handleRegister"
       >
-        <el-form-item label="用户类型" prop="userType" required>
+        <div class="user-type-field">
           <div class="user-type-buttons" role="radiogroup" aria-label="用户类型">
             <button
               v-for="option in USER_TYPE_OPTIONS"
@@ -25,7 +25,7 @@
               {{ option.label }}
             </button>
           </div>
-        </el-form-item>
+        </div>
         <el-form-item label="用户名" prop="username" required>
           <el-input v-model="form.username" placeholder="请输入用户名" />
         </el-form-item>
@@ -160,8 +160,7 @@ const rules = {
   smsCode: [
     { required: true, message: '请输入短信验证码', trigger: 'blur' },
     { pattern: /^\d{6}$/, message: '短信验证码为6位数字', trigger: 'blur' }
-  ],
-  userType: requiredRule('用户类型')
+  ]
 }
 
 async function handleSendSmsCode() {
@@ -278,6 +277,10 @@ onBeforeUnmount(() => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   width: 100%;
+}
+
+.user-type-field {
+  margin-bottom: 18px;
 }
 
 .user-type-button {
