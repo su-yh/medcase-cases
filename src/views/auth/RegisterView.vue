@@ -115,7 +115,7 @@ const form = reactive({
   password: '',
   confirmPassword: '',
   phone: '',
-  smsCode: '999999',
+  smsCode: '',
   userType: getPreferredUserType()
 })
 

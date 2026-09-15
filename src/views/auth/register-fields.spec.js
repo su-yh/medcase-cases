@@ -38,9 +38,10 @@ describe('user registration fields', () => {
     }
   })
 
-  it('includes SMS verification with the fixed development code', () => {
+  it('includes SMS verification without a prefilled development code', () => {
     expect(registerViewSource).toContain('prop="smsCode"')
-    expect(registerViewSource).toContain("smsCode: '999999'")
+    expect(registerViewSource).toContain("smsCode: ''")
+    expect(registerViewSource).not.toContain("smsCode: '999999'")
     expect(registerViewSource).toContain('sendRegisterSmsCode')
   })
 
