@@ -14,4 +14,15 @@ describe('review submission title', () => {
     expect(viewSource).toContain('profile-type-text')
     expect(viewSource).toContain('color: var(--el-color-primary)')
   })
+
+  it('returns from the pending review page after ten seconds or by button click', () => {
+    expect(viewSource).toContain('返回登录')
+    expect(viewSource).toContain('pendingSeconds')
+    expect(viewSource).toContain('startCountdown(')
+    expect(viewSource).toContain('    10,')
+    expect(viewSource).toContain('watch(')
+    expect(viewSource).toContain('pendingReview,')
+    expect(viewSource).toContain('handleReturnToLogin')
+    expect(viewSource).toContain('await userStore.logout()')
+  })
 })

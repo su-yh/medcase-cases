@@ -4,9 +4,9 @@
       <template v-if="pendingReview">
         <div class="profile-state">
           <h1>资料已提交</h1>
-          <p>资料正在等待管理员审核，通过后即可进入病例工作台。</p>
+          <p>资料正在等待管理员审核，{{ pendingSeconds }} 秒后自动返回登录页面。</p>
           <div class="profile-actions">
-            <el-button @click="handleLogout">退出登录</el-button>
+            <el-button type="primary" @click="handleReturnToLogin">返回登录</el-button>
             <el-button
               v-if="canDeleteAccount"
               type="danger"
@@ -174,7 +174,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
@@ -182,6 +182,7 @@ import AttachmentPreviewDialog from '@/components/attachments/AttachmentPreviewD
 import { getSupplierOptions } from '@/api/user/supplier'
 import { uploadProfileAttachment } from '@/api/user/profile'
 import { normalizeEnumCode, USER_STATUS, USER_TYPE } from '@/constants/user'
+import { startCountdown } from '@/utils/countdown'
 import { userTypeLabel } from '@/utils/userType'
 
 const router = useRouter()
@@ -193,8 +194,11 @@ const deleting = ref(false)
 const previewOpen = ref(false)
 const previewAttachment = ref(null)
 const fieldUploading = ref('')
+const pendingSeconds = ref(10)
 const supplierOptions = ref([])
 const visibleSupplierOptions = ref([])
+let stopPendingCountdown
+let returningToLogin = false
 const form = reactive({
   nickName: '',
   phone: '',
@@ -337,6 +341,40 @@ async function handleLogout() {
   await router.replace('/login')
 }
 
+async function handleReturnToLogin() {
+  if (returningToLogin) {
+    return
+  }
+
+  returningToLogin = true
+  stopPendingCountdown?.()
+  await handleLogout()
+}
+
+function startPendingCountdown() {
+  stopPendingCountdown?.()
+  pendingSeconds.value = 10
+  stopPendingCountdown = startCountdown(
+    10,
+    seconds => {
+      pendingSeconds.value = seconds
+    },
+    handleReturnToLogin
+  )
+}
+
+watch(
+  pendingReview,
+  isPending => {
+    if (isPending) {
+      startPendingCountdown()
+      return
+    }
+    stopPendingCountdown?.()
+  },
+  { immediate: true }
+)
+
 async function handleDeleteAccount() {
   try {
     await ElMessageBox.confirm(
@@ -370,6 +408,11 @@ onMounted(async () => {
       visibleSupplierOptions.value = supplierOptions.value
     })
   ])
+
+})
+
+onBeforeUnmount(() => {
+  stopPendingCountdown?.()
 })
 </script>
 
