@@ -23,6 +23,14 @@ export function updateProfilePhone(data) {
   })
 }
 
+export function sendProfilePhoneSmsCode(phone) {
+  return request({
+    url: '/biz/user-profile/phone/sms-code',
+    method: 'post',
+    data: { phone }
+  })
+}
+
 export function updateProfilePassword(data) {
   return request({
     url: '/biz/user-profile/password',

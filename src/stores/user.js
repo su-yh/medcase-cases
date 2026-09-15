@@ -7,6 +7,7 @@ import {
 } from '@/api/user/auth'
 import {
   getMyProfile,
+  sendProfilePhoneSmsCode as sendProfilePhoneSmsCodeApi,
   submitProfile as submitProfileApi,
   updateProfilePassword as updateProfilePasswordApi,
   updateProfilePhone as updateProfilePhoneApi
@@ -38,6 +39,9 @@ const useUserStore = defineStore('user', {
     async updateProfilePhone(payload) {
       await updateProfilePhoneApi(payload)
       return this.loadProfile()
+    },
+    async sendProfilePhoneSmsCode(phone) {
+      return sendProfilePhoneSmsCodeApi(phone)
     },
     async updateProfilePassword(payload) {
       await updateProfilePasswordApi(payload)

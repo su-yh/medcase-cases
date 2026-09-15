@@ -46,7 +46,11 @@ describe('user profile api', () => {
 
   it('updates the current user phone', async () => {
     const { updateProfilePhone } = await import('@/api/user/profile')
-    const data = { phone: '13900000000' }
+    const data = {
+      phone: '13900000000',
+      password: 'current-password',
+      smsCode: '123456'
+    }
 
     updateProfilePhone(data)
 
@@ -54,6 +58,18 @@ describe('user profile api', () => {
       url: '/biz/user-profile/phone',
       method: 'put',
       data
+    })
+  })
+
+  it('sends a verification code to the new profile phone', async () => {
+    const { sendProfilePhoneSmsCode } = await import('@/api/user/profile')
+
+    sendProfilePhoneSmsCode('13900000000')
+
+    expect(requestMock).toHaveBeenCalledWith({
+      url: '/biz/user-profile/phone/sms-code',
+      method: 'post',
+      data: { phone: '13900000000' }
     })
   })
 

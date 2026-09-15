@@ -233,8 +233,29 @@
         label-position="top"
         @submit.prevent="handlePhoneUpdate"
       >
-        <el-form-item label="手机号" prop="phone" required>
-          <el-input v-model="phoneForm.phone" maxlength="20" placeholder="请输入手机号" />
+        <el-form-item label="新手机号" prop="phone" required>
+          <el-input v-model="phoneForm.phone" maxlength="20" placeholder="请输入新手机号" />
+        </el-form-item>
+        <el-form-item label="当前密码" prop="password" required>
+          <el-input
+            v-model="phoneForm.password"
+            type="password"
+            show-password
+            placeholder="请输入当前登录密码"
+          />
+        </el-form-item>
+        <el-form-item label="短信验证码" prop="smsCode" required>
+          <div class="sms-code-field">
+            <el-input v-model="phoneForm.smsCode" maxlength="6" placeholder="请输入验证码" />
+            <el-button
+              type="primary"
+              :disabled="smsCodeSending || smsCountdown > 0"
+              :loading="smsCodeSending"
+              @click="handleSendPhoneSmsCode"
+            >
+              {{ smsCountdown > 0 ? `${smsCountdown} 秒后重发` : '获取验证码' }}
+            </el-button>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -289,10 +310,11 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/stores/user'
+import { startCountdown } from '@/utils/countdown'
 import AttachmentPreviewDialog from '@/components/attachments/AttachmentPreviewDialog.vue'
 import { getSupplierOptions } from '@/api/user/supplier'
 import { uploadProfileAttachment } from '@/api/user/profile'
@@ -304,6 +326,8 @@ const userStore = useUserStore()
 const loadingProfile = ref(false)
 const submitting = ref(false)
 const phoneSaving = ref(false)
+const smsCodeSending = ref(false)
+const smsCountdown = ref(0)
 const passwordSaving = ref(false)
 const deleting = ref(false)
 const phoneDialogVisible = ref(false)
@@ -338,7 +362,9 @@ const reviewForm = reactive({
   qualificationCertificate: null
 })
 const phoneForm = reactive({
-  phone: ''
+  phone: '',
+  password: '',
+  smsCode: ''
 })
 const passwordForm = reactive({
   oldPassword: '',
@@ -410,6 +436,11 @@ const phoneRules = {
   phone: [
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+  ],
+  password: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
+  smsCode: [
+    { required: true, message: '请输入短信验证码', trigger: 'blur' },
+    { pattern: /^\d{6}$/, message: '短信验证码为6位数字', trigger: 'blur' }
   ]
 }
 const passwordRules = {
@@ -427,6 +458,8 @@ const passwordRules = {
     }
   ]
 }
+
+let stopSmsCountdown
 
 async function loadProfile() {
   loadingProfile.value = true
@@ -490,12 +523,47 @@ async function handlePhoneUpdate() {
   }
   phoneSaving.value = true
   try {
-    await userStore.updateProfilePhone({ phone: phoneForm.phone })
+    await userStore.updateProfilePhone({
+      phone: phoneForm.phone,
+      password: phoneForm.password,
+      smsCode: phoneForm.smsCode
+    })
     account.phone = phoneForm.phone
+    phoneForm.password = ''
+    phoneForm.smsCode = ''
     phoneDialogVisible.value = false
     ElMessage.success('手机号修改成功')
   } finally {
     phoneSaving.value = false
+  }
+}
+
+async function handleSendPhoneSmsCode() {
+  if (smsCodeSending.value || smsCountdown.value > 0) {
+    return
+  }
+
+  const valid = await phoneFormRef.value?.validateField('phone').catch(() => false)
+  if (!valid) {
+    return
+  }
+
+  smsCodeSending.value = true
+  try {
+    await userStore.sendProfilePhoneSmsCode(phoneForm.phone)
+    ElMessage.success('验证码已发送')
+    stopSmsCountdown?.()
+    stopSmsCountdown = startCountdown(
+      60,
+      (seconds) => {
+        smsCountdown.value = seconds
+      },
+      () => {
+        smsCountdown.value = 0
+      }
+    )
+  } finally {
+    smsCodeSending.value = false
   }
 }
 
@@ -571,6 +639,8 @@ function openPreview(attachment) {
 
 function openPhoneDialog() {
   phoneForm.phone = account.phone
+  phoneForm.password = ''
+  phoneForm.smsCode = ''
   phoneDialogVisible.value = true
 }
 
@@ -613,6 +683,10 @@ onMounted(async () => {
       visibleSupplierOptions.value = supplierOptions.value
     })
   ])
+})
+
+onBeforeUnmount(() => {
+  stopSmsCountdown?.()
 })
 </script>
 
@@ -758,6 +832,16 @@ onMounted(async () => {
   width: min(100%, 980px);
   margin: 0 auto;
   text-align: right;
+}
+
+.sms-code-field {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.sms-code-field .el-input {
+  min-width: 0;
 }
 
 @media (max-width: 700px) {
