@@ -22,7 +22,7 @@
           <button type="button" class="case-account-trigger">
             <span class="case-avatar">{{ userType.charAt(0) }}</span>
             <span>
-              <strong>{{ userType }}账号</strong>
+              <strong>{{ userStore.userInfo.nickName }}</strong>
               <small>前端 v{{ appVersion }} / 后端 v{{ backendVersion }}</small>
             </span>
           </button>
