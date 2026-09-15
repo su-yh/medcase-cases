@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { USER_TYPE } from '@/constants/user'
 import {
   getPreferredUserType,
+  getUserTypeThemeStyle,
   getUserTypeTheme,
+  preferredUserType,
   setPreferredUserType,
   USER_TYPE_OPTIONS
 } from '@/utils/userTypePreference'
@@ -31,6 +33,7 @@ describe('user type preference', () => {
     setPreferredUserType(USER_TYPE.PATIENT, storage)
 
     expect(getPreferredUserType(storage)).toBe(USER_TYPE.PATIENT)
+    expect(preferredUserType.value).toBe(USER_TYPE.PATIENT)
   })
 
   it('ignores unsupported stored values', () => {
@@ -71,5 +74,17 @@ describe('user type preference', () => {
     expect(getUserTypeTheme(USER_TYPE.DOCTOR).name).toBe('doctor')
     expect(getUserTypeTheme(USER_TYPE.PATIENT).name).toBe('patient')
     expect(getUserTypeTheme(USER_TYPE.DOCTOR).primary).not.toBe(getUserTypeTheme(USER_TYPE.PATIENT).primary)
+  })
+
+  it('provides global CSS variables for the selected theme', () => {
+    const style = getUserTypeThemeStyle(USER_TYPE.PATIENT)
+
+    expect(style).toMatchObject({
+      '--case-theme-primary': getUserTypeTheme(USER_TYPE.PATIENT).primary,
+      '--case-theme-background': getUserTypeTheme(USER_TYPE.PATIENT).background,
+      '--el-color-primary': getUserTypeTheme(USER_TYPE.PATIENT).primary,
+      '--el-color-primary-light-9': expect.any(String),
+      '--el-color-primary-dark-2': expect.any(String)
+    })
   })
 })

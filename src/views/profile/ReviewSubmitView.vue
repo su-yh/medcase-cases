@@ -23,7 +23,9 @@
       <template v-else>
         <header class="profile-heading">
           <span v-if="reviewFailed" class="profile-state-label">审核未通过</span>
-          <h1>{{ reviewFailed ? '重新提交资料' : '完善资料' }}</h1>
+          <h1>
+            {{ reviewFailed ? '重新提交' : '完善' }}<span class="profile-type-text">{{ userTypeText }}</span>资料
+          </h1>
           <p>{{ reviewFailed ? '请更新资料后重新提交审核。' : '请填写基本资料后提交管理员审核。' }}</p>
           <el-alert
             v-if="reviewFailed && userStore.userInfo?.reviewReason"
@@ -180,6 +182,7 @@ import AttachmentPreviewDialog from '@/components/attachments/AttachmentPreviewD
 import { getSupplierOptions } from '@/api/user/supplier'
 import { uploadProfileAttachment } from '@/api/user/profile'
 import { normalizeEnumCode, USER_STATUS, USER_TYPE } from '@/constants/user'
+import { userTypeLabel } from '@/utils/userType'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -206,6 +209,7 @@ const form = reactive({
 const profileStatus = computed(() => userStore.userInfo?.status)
 const normalizedProfileStatus = computed(() => normalizeEnumCode(profileStatus.value))
 const isDoctor = computed(() => normalizeEnumCode(userStore.userInfo?.userType) === USER_TYPE.DOCTOR)
+const userTypeText = computed(() => userTypeLabel(userStore.userInfo?.userType))
 const pendingReview = computed(() => normalizedProfileStatus.value === USER_STATUS.PENDING_REVIEW)
 const reviewFailed = computed(() => normalizedProfileStatus.value === USER_STATUS.REVIEW_FAILED)
 const canDeleteAccount = computed(() => [
@@ -407,6 +411,10 @@ onMounted(async () => {
 .profile-state-label {
   color: var(--el-color-danger);
   font-size: 13px;
+}
+
+.profile-type-text {
+  color: var(--el-color-primary);
 }
 
 .profile-state {

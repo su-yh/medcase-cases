@@ -88,7 +88,7 @@ async function handleLogout() {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 228px minmax(0, 1fr);
-  background: var(--el-bg-color-page);
+  background: var(--case-theme-background);
 }
 
 .case-sidebar {

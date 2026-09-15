@@ -1,5 +1,5 @@
 <template>
-  <div class="auth-page" :style="authThemeStyle">
+  <div class="auth-page">
     <el-card class="auth-card" shadow="always">
       <h1>病例端登录</h1>
       <p>欢迎来到 MedCase 病例端</p>
@@ -50,13 +50,12 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getCaptcha } from '@/api/user/auth'
 import useUserStore from '@/stores/user'
 import {
   getPreferredUserType,
-  getUserTypeTheme,
   setPreferredUserType,
   USER_TYPE_OPTIONS
 } from '@/utils/userTypePreference'
@@ -74,17 +73,6 @@ const form = reactive({
   uuid: '',
   userType: getPreferredUserType()
 })
-
-const currentTheme = computed(() => getUserTypeTheme(form.userType))
-const authThemeStyle = computed(() => ({
-  '--auth-primary': currentTheme.value.primary,
-  '--auth-primary-hover': currentTheme.value.primaryHover,
-  '--auth-primary-active': currentTheme.value.primaryActive,
-  '--auth-primary-soft': currentTheme.value.primarySoft,
-  '--auth-border': currentTheme.value.border,
-  '--auth-shadow': currentTheme.value.shadow,
-  '--auth-background': currentTheme.value.background
-}))
 
 function selectUserType(userType) {
   form.userType = setPreferredUserType(userType)
@@ -116,25 +104,25 @@ onMounted(loadCaptcha)
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--auth-background);
+  background: var(--case-theme-background);
   transition: background 0.2s ease;
 }
 
 .auth-card {
   width: 100%;
   max-width: 420px;
-  border: 1px solid var(--auth-border);
-  border-top: 4px solid var(--auth-primary);
-  box-shadow: var(--auth-shadow);
+  border: 1px solid var(--case-theme-border);
+  border-top: 4px solid var(--case-theme-primary);
+  box-shadow: var(--case-theme-shadow);
 }
 
 :deep(.el-button--primary) {
-  --el-button-bg-color: var(--auth-primary);
-  --el-button-border-color: var(--auth-primary);
-  --el-button-hover-bg-color: var(--auth-primary-hover);
-  --el-button-hover-border-color: var(--auth-primary-hover);
-  --el-button-active-bg-color: var(--auth-primary-active);
-  --el-button-active-border-color: var(--auth-primary-active);
+  --el-button-bg-color: var(--case-theme-primary);
+  --el-button-border-color: var(--case-theme-primary);
+  --el-button-hover-bg-color: var(--case-theme-primary-hover);
+  --el-button-hover-border-color: var(--case-theme-primary-hover);
+  --el-button-active-bg-color: var(--case-theme-primary-active);
+  --el-button-active-border-color: var(--case-theme-primary-active);
 }
 
 h1 {
@@ -152,7 +140,7 @@ p {
   font-size: 14px;
 
   :deep(a) {
-    color: var(--auth-primary-hover);
+    color: var(--case-theme-primary-hover);
   }
 }
 
@@ -169,7 +157,7 @@ p {
 
 .user-type-button {
   min-height: 42px;
-  border: 1px solid var(--auth-border);
+  border: 1px solid var(--case-theme-border);
   border-radius: 8px;
   background: #fff;
   color: #1f2937;
@@ -180,14 +168,14 @@ p {
 }
 
 .user-type-button:hover {
-  border-color: var(--auth-primary);
-  color: var(--auth-primary);
+  border-color: var(--case-theme-primary);
+  color: var(--case-theme-primary);
   box-shadow: 0 6px 16px rgb(15 23 42 / 10%);
 }
 
 .user-type-button.is-active {
-  border-color: var(--auth-primary);
-  background: var(--auth-primary);
+  border-color: var(--case-theme-primary);
+  background: var(--case-theme-primary);
   color: #fff;
   box-shadow: 0 10px 20px rgb(15 23 42 / 16%);
 }
